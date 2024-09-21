@@ -1,0 +1,80 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+
+    <h1>Scambio documenti</h1>
+
+
+    {% if docs_da_firmare %}
+    <h2 class="mt-4">Documenti da firmare</h2>
+    <ul class="list-group">
+        {% for doc in docs_da_firmare %}
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col-sm-6">
+                    <a href="{% url 'home:accettazione_offerta' doc.pk %}"><i class="fa-regular fa-download"></i> {{ doc }}</a>
+                </div>
+                <div class="col-sm-6">
+                    {% if not doc.firmato %}
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="signed" value="{{doc.pk}}">
+
+                            <input hidden id="signed-{{forloop.counter}}" required type="file" name="file" >
+
+                            <label for="signed-{{forloop.counter}}">
+
+                        <span title="Carica" class="btn btn-success btn-sm"><i class="fa-regular fa-upload"></i> Carica</span></label>
+                    </form>
+                    {% else %}
+                    <a href="{{doc.firmato.url}}">Firmato</a>
+                    {% endif %}
+                </div>
+            </div>
+
+
+        
+       
+        
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+
+    {% if documenti %}
+    <ul class="list-group">
+        {% for doc in documenti %}
+        <li class="list-group-item d-flex justify-content-between"><a href="{{ doc.document.url }}"><i class="fa-regular fa-file"></i> {{ doc.document.title }}</a>
+        
+            {% if not doc.document.uploaded_by_user %}
+        <form method="post" onsubmit="return confirm('Sei sicuro?')">
+        {% csrf_token %}
+        <button name="delete" title="Elimina" value="{{ doc.id }}" type="submit" class="btn btn-danger btn-sm"><i class="fa-regular fa-trash"></i> </button>
+        </form>
+        {% endif %}
+        
+        </li>
+        {% endfor %}
+        </ul>
+
+    {% endif %}
+    <form class="my-5 card card-body bg-light" method="post" enctype="multipart/form-data">
+        <fieldset>
+            <legend>Aggiungi nuovi documenti</legend>
+            {% csrf_token %}
+            <input type="hidden" name="upload">
+            <input hidden required type="file" name="files" multiple id="upload-other"> 
+            <label for="upload-other">
+                <span title="Carica" class="btn btn-success btn-sm"><i class="fa-regular fa-upload"></i> Carica</span></label>
+        </fieldset>
+    </form>
+
+    <script>
+        document.querySelectorAll('input[type=file]').forEach(input => {
+            input.addEventListener('change', e => {
+                input.closest('form').submit()
+            })
+        })
+    </script>
+{% endblock %}

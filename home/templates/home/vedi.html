@@ -1,0 +1,373 @@
+{% extends "wagtailadmin/generic/base.html" %}
+{% load i18n wagtailadmin_tags %}
+
+{% block main_header %}
+{% include "wagtailadmin/shared/header.html" with title=page_subtitle icon=header_icon only %}
+{% endblock %}
+
+{% block main_content %}
+    {{object.indirizzo}} <br>
+    {{object.cap}} {{object.citta}} {{object.provincia}} <br>
+    Tel: {{object.telefono}} <br>
+    Email: <a href="{{object.email}}">{{object.email}}</a><br>
+    {{object.note}} <br>
+
+
+
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="main-box">
+            
+    <div class="clearfix">
+        <h2 class="pull-left">
+            {{object.ragsoc}} {% if object.gruppo %}<small>({{object.gruppo.nome}})</small>{% endif %}</h2>
+    </div>        
+    
+            <div id="user-profile">
+                <div class="row profile-user-info">
+                    <div class="col-sm-8">
+                        <div class="profile-user-details clearfix">
+                            <div class="profile-user-details-label">
+                                Indirizzo
+                            </div>
+                            <div class="profile-user-details-value">
+                                {% if object.indirizzo %}{{object.indirizzo}}<br>{% endif %}
+                                {{object.cap}} {{object.citta}} {% if object.provincia %}({{object.provincia}}){% endif %}&nbsp;
+                                {% if object.stato != 'Italia' %}<br>{{object.stato}}{% endif %}
+                                {% if object.citta %}<br>
+                                <a target="_blank" href="{{object.link_mappa}}"><i class="fa fa-map"></i> Mappa</a>{% endif %}
+                            </div>
+                        </div>
+    {% if object.piva %}<p>P. IVA: <strong>{{object.piva}}</strong></p>{% endif %}
+    {% if object.cf %}<p>Codice fiscale: <strong>{{object.cf}}</strong></p>{% endif %}
+    {% if object.banca %}<p>Banca: <strong>{{object.banca}}</strong></p>{% endif %}
+    {% if object.iban %}<p>IBAN: <strong>{{object.iban}}</strong></p>{% endif %}
+    {% if object.banca %}<p>Banca: <strong>{{object.banca}}</strong></p>{% endif %}
+    {% if object.segnalazione %}<p>Segnalazione: <strong>{{object.segnalazione}}</strong></p>{% endif %}
+
+                        {% if object.data %}<div class="profile-user-details clearfix">
+                            <div class="profile-user-details-label">
+                                Inserito il
+                            </div>
+                            <div class="profile-user-details-value">
+                                {{object.data|date:'j.n.Y'}}&nbsp;
+                            </div>
+                        </div>{% endif %}
+                        {% if object.richieste.all %}<div class="profile-user-details clearfix">
+                            <div class="profile-user-details-label">
+                                Richieste
+                            </div>
+                            <div class="profile-user-details-value">
+                                {% for richiesta in object.richieste.all %}<span class="badge">{{richiesta.nome}}</span> {% endfor %}
+                            </div>
+                        </div>{% endif %}
+                        {% if object.inizio_lavori or object.data_installazione or object.ditta_installatrice %}<div class="profile-user-details clearfix">
+                            <div class="profile-user-details-label">
+                                Installazione
+                            </div>
+                            <div class="profile-user-details-value">
+                                {% if object.inizio_lavori %}<strong>Inizio previsto</strong>: {{object.inizio_lavori|date:'j.n.Y'}}<br>{% endif %}
+                                {% if object.data_installazione %}<strong>Data</strong>: {{object.data_installazione|date:'j.n.Y'}}<br>{% endif %}
+                                {% if object.ditta_installatrice %}<strong>Ditta</strong>: {{object.ditta_installatrice}}<br>{% endif %}
+                            </div>
+                        </div>{% endif %}
+                        {% if object.note %}<div class="profile-user-details clearfix">
+                            <div class="profile-user-details-label">
+                                Note
+                            </div>
+                            <div class="profile-user-details-value">
+                                {{object.note|linebreaksbr}}&nbsp;
+                            </div>
+                        </div>{% endif %}
+                        
+                        {% if object.altri_dati %}
+                            <h3>Altri dati</h3>
+                            {% for field in object.altri_dati %}
+                            <div class="row" style="margin-bottom: 5px">
+                                <div class="col-xs-6 text-right">
+                                    <strong>{{field.label}}</strong>
+                                </div>
+                                <div class="col-xs-6">
+                                    {% if field.type == 'B' %}
+                                        {{field.value|yesno}}
+                                    {% else %}
+                                        {{field.value}}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-4 profile-social">
+                        <ul class="fa-ul">
+                            {% if object.telefono %}<li><i class="fa-li fa fa-phone"></i><a href="tel:{{object.telefono}}">{{object.telefono}}&nbsp;</a></li>{% endif %}
+                            {% if object.email %}<li><i class="fa-li fa fa-envelope"></i><a href="mailto:{{object.email}}">{{object.email}}&nbsp;</a></li>{% endif %}
+                            {% if object.pec %}<li><i class="fa-li fa fa-envelope"></i><a href="mailto:{{object.pec}}">{{object.pec}}&nbsp;</a></li>{% endif %}
+                            {% if object.fax %}<li><i class="fa-li fa fa-fax"></i><a href="#">{{object.fax}}&nbsp;</a></li>{% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            
+    
+    
+    <h2 class="pull-left">Persone</h2>
+
+    
+    <div class="table-responsive">
+    <form method="post">{% csrf_token %}
+    
+        <table class="listing">
+            <thead>
+                <tr>
+                    <th><span>Ruolo</span></th>
+                    <th><span>Telefono</span></th>
+                    <th><span>Email</span></th>
+                </tr>
+            </thead>
+            <tbody>
+               {% for persona in object.persone.all %}
+                <tr{% if not persona.instance.id %} class="placeholder"{% endif %}>
+                    <td>
+                         {% for hidden in persona.hidden_fields %}{{hidden}}{% endfor %}
+                         <div class="hidden">{{persona.DELETE}}</div>
+                        <div class="user-link"><span class="view-mode">{{persona.nome.value}}</span>{{persona.nome}}</div>
+                        <span class="user-subhead"><span class="view-mode">{{persona.mansione.value}}</span>{{persona.mansione}}</span>
+                    </td>
+                    <td>
+                        <i class="fa fa-phone"></i> <span class="view-mode">{{persona.telefono.value}}</span>{{persona.telefono}}
+                    </td>
+                    <td>
+                        <i class="fa fa-envelope"></i> <span class="view-mode"><a href="mailto:{{persona.email.value}}">{{persona.email.value}}</span></a>{{persona.email}}
+                    </td>
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    </div>
+    
+    <div class="clearfix">
+        <h2 class="pull-left">Attività</h2>
+
+    </div>
+    
+    <div class="table-responsive clearfix">
+    <form method="post">{% csrf_token %}
+        <table class="listing">
+            <thead>
+                <tr>
+                    <th><span>Data</span></th>
+                    <th><span>Descrizione</span></th>
+                    <th><span>Persona</span></th>
+                    <th><span>Azioni</span></th>
+                </tr>
+            </thead>
+            <tbody>
+    {% for attivita in object.attivita.all %}
+            <tr{% if not attivita.instance.id and not attivita.errors %} class="placeholder"{% endif %}>
+                <td>
+                {% for hidden in attivita.hidden_fields %}{{hidden}}{% endfor %}
+                    <div class="hidden">{{attivita.DELETE}}</div>
+                    <span class="view-mode">{{attivita.instance.data|date:'j.n.Y'}}&nbsp;{{attivita.instance.ora|date:'G:i'|default:''}}</span> {{attivita.data}} {{attivita.ora}}</td>
+            <td><span class="view-mode"><strong>{{attivita.instance.tipo}}</strong> {{attivita.descrizione.value|default:''|linebreaksbr}}</span>
+                {{attivita.tipo}}
+                    {% if attivita.tipo.errors %}<p class="red">{{attivita.tipo.errors.0}}</p>{% endif %}
+                <br>{{attivita.descrizione}}</td>
+                <td><span class="view-mode">{{attivita.instance.agente|default:''}}</span> {{attivita.agente}}</td>
+                <td style="width: 20%;">
+                    <a href="#" class="table-link edit-inline-link view-mode" title="Modifica">
+                        <span class="fa-stack">
+                            <i class="fa fa-square fa-stack-2x"></i>
+                            <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                    <a class="table-link danger view-mode attivita-delete" title="Elimina" href="#">
+                        <span class="fa-stack">
+                            <i class="fa fa-square fa-stack-2x"></i>
+                            <i class="fa fa-trash-o fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                    <button name="attivita-save" title="Salva" class="btn btn-success edit-mode">
+                        <i class="fa fa-save"></i>
+                    </button>
+                    <a href="#" class="table-link field-edit cancel-inline-link edit-mode" title="Annulla">
+                        <span class="fa-stack">
+                            <i class="fa fa-square fa-stack-2x"></i>
+                            <i class="fa fa-times fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                </td>
+            </tr>
+    {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    </div>
+    
+        <h2>Offerte</h2>
+
+    
+    
+        {% if object.offerte.all %}
+            
+    <div class="table-responsive clearfix">
+        <table class="listing">
+            <thead>
+                <tr>
+                    <th><span>Offerta</span></th>
+                    <th><span>Data</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for offerta in object.offerte.all %}
+    
+                <tr>
+                    <td>{% if offerta.confermata %}<i class="fa fa-star" title="Confermata"></i>{% endif %}
+                        <a href="/admin/snippets/home/offerta/edit/{{offerta.pk}}">
+                            {{offerta.titolo}} {{offerta.numero_documento}}
+                        </a>
+                    </td>
+                    <td>
+                        {{offerta.data|date:'j F Y'|lower}}
+                    </td>
+                     
+    
+                </tr>
+                {% endfor %}
+    
+                {% if offerta_copied %}
+                <tr>
+                    <td><a href="{{offerta_copied.get_absolute_url}}">
+                            Vedi l’offerta {{offerta_copied.numero_documento}} di {{offerta_copied.object}} da incollare
+                        </a>
+                    </td>
+                    <td>
+                        {{offerta_copied.data|date:'j F Y'}}</span>
+                    </td>
+                    <td>
+                        <a href="" class="table-link" title="Incolla">
+                            <span class="fa-stack">
+                                <i class="fa fa-square fa-stack-2x"></i>
+                                <i class="fa fa-paste fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                        <a href="" class="table-link" title="Annulla copia">
+                            <span class="fa-stack">
+                                <i class="fa fa-square fa-stack-2x"></i>
+                                <i class="fa fa-ban fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </td>
+                </tr>
+                {% endif %}
+    
+            </tbody>
+        </table>
+    </div>
+        {% endif %}
+        
+    
+    
+
+    
+    {% if not object.gruppo.is_privato %}
+    <div class="clearfix">
+        <h2>Condizioni di vendita</h2>
+    
+        {% for marchio in object.marchi %}
+        <div class="col-sm-12 col-lg-4">
+            <div class="condizioni-vendita">
+    {% if perms.sito.change_condizioneobject %}
+    <form action="condizioni_save" method="post">
+    {% csrf_token %}
+    {% endif %}
+                
+                <h3><img src="/media/{{marchio.logo.url}}" alt="{{marchio.nome}}"></h3>
+    {% if perms.sito.change_condizioneobject %}
+                <a href="#" class="table-link edit-inline-link view-mode" title="Modifica">
+                    <span class="fa-stack">
+                        <i class="fa fa-square fa-stack-2x"></i>
+                        <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
+                    </span>
+                </a>
+    {% endif %}
+                <ul>
+                {% for condizione in marchio.condizioni %}
+                    <li><h4>{{condizione.nome}}</h4>
+                        <p class="view-mode{% if not condizione.is_gruppo %} red{% endif %}">{{condizione.valore|linebreaksbr}}</p>
+                    <textarea class="edit-mode form-control" rows="2" name="cond-{{condizione.condizione_marchio.id}}-{{condizione.condizione_object.id}}">{{condizione.valore}}</textarea></li>
+                {% endfor %}
+                </ul>
+            {% if marchio.condizionedata %} <p class="text-right"><small>Aggiornamento: <strong>{{marchio.condizionedata.data|date:'j F Y'}}</strong></small></p>{% endif %}
+    
+        
+    {% if perms.sito.change_condizioneobject %}
+        <button name="persona-save" title="Salva" class="btn btn-success edit-mode">
+            <i class="fa fa-save"></i>
+        </button>
+        <a href="#" class="table-link field-edit cancel-inline-link edit-mode" title="Annulla">
+            <span class="fa-stack">
+                <i class="fa fa-square fa-stack-2x"></i>
+                <i class="fa fa-times fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+       </form>
+    {% endif %}    
+        </div>
+    
+        
+        
+        </div>
+        {% if forloop.counter|divisibleby:'3' %}<div class="clearfix visible-lg"></div>{% endif %}
+        {% endfor %}
+    </div>
+    
+    {% endif %}
+    
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+
+    {% block footer %}
+        {% if edit_url or delete_url %}
+            <footer class="footer">
+                <div class="footer__container">
+                    {% if edit_url %}
+                        <a href="{{ edit_url }}" class="button">{% trans 'Edit' %}</a>
+                    {% endif %}
+                    {% if delete_url %}
+                        <a href="{{ delete_url }}" class="button serious">{% trans 'Delete' %}</a>
+                    {% endif %}
+                </div>
+            </footer>
+        {% endif %}
+    {% endblock %}
+{% endblock %}

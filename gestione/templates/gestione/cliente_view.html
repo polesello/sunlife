@@ -1,0 +1,774 @@
+{% extends "wagtailadmin/base.html" %}
+{% load static %}
+{% block titletag %}{{cliente}}{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,300|Titillium+Web:200,300,400" rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script src="https://kit.fontawesome.com/51f11f635e.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css"
+/>
+<link rel="stylesheet" href="{% static 'gestione/css/style.min.css' %}">
+
+<style>
+    .mini-card {
+        background-color: #f8f8f8;
+        padding: 10px;
+        position: relative;
+    }
+    .mini-card .tipo {
+        font-size: 12px;
+        float: right;
+        position: relative;
+        top: -10px;
+        right: -10px;
+        background-color: #333;
+        color: white;
+        padding: 3px 8px;
+    }
+
+
+
+
+    .edit-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: none;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+
+    .card:hover .edit-btn {
+        display: block;
+    }
+
+    .images img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .images .doc-name {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        right: 15px;
+        width: auto;
+
+        border: 1px solid #ddd;
+        background-color: #f8f8f8;
+        font-size: 12px;
+        padding: 0 3px;
+        min-height: 0;
+    }
+
+    .images i.fa-file {
+        font-size: 3em;
+        color: #ddd;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .images .delete-btn, .images .save-btn {
+        display: none;
+    }
+
+    .images .card:hover .delete-btn, .images .card:hover .save-btn {
+        display: block;
+    }
+
+    td a {
+        text-decoration: none;
+    }
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+{% include "wagtailadmin/shared/header.html" with title=cliente icon="user" %}
+
+<div class="px-4">
+    {{ cliente_json|json_script:"cliente-json" }}
+    {{ liste_json|json_script:"liste-json" }}
+
+
+    <p><a target="_blank" class="btn btn-sm btn-info text-white" href="{% url 'home:cliente_start' cliente.pk cliente.token %}">Link cliente</a></p>
+<div id="app">
+    
+
+<div v-if="!cliente.editing" class="card">
+    <div class="card-body bg-light">
+    <a @click="cliente.editing=true" class="btn btn-sm btn-light edit-btn"><i class="far fa-pen"></i></a>
+
+    <div class="row mb-2">
+        <div class="col-md-2 text-md-end fw-bold">
+            Indirizzo
+        </div>
+        <div class="col-md-10">
+            <div class="row">
+                <div class="col-sm-6">
+                    [[cliente.indirizzo]]<br>
+                    [[cliente.cap]] [[cliente.citta]] [[cliente.provincia]]
+                    {% if cliente.citta %}<br>
+                    <a target="_blank" href="{{cliente.link_mappa}}"><i class="fa fa-map"></i> Mappa</a>{% endif %}
+                </div>
+                <div class="col-sm-6">
+                    <p class="mb-0" v-if="cliente.telefono"><i class="far fa-phone fa-fw"></i> <a :href="'tel:' + cliente.telefono">[[cliente.telefono]]</a></p>
+                    <p class="mb-0" v-if="cliente.email"><i class="far fa-envelope fa-fw"></i> <a :href="'mailto:' + cliente.email">[[cliente.email]]</a></p>
+                    <p class="mb-0" v-if="cliente.pec">PEC: [[cliente.pec]]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-2" v-if="cliente.piva">
+        <div class="col-md-2 text-md-end fw-bold">
+            P. IVA
+        </div>
+        <div class="col-md-10">
+            [[cliente.piva]]
+        </div>
+    </div>
+    <div class="row mb-2" v-if="cliente.cf">
+        <div class="col-md-2 text-md-end fw-bold">
+            Codice fiscale
+        </div>
+        <div class="col-md-10">
+            [[cliente.cf]]
+        </div>
+    </div>
+    <div class="row mb-2" v-if="cliente.sdi">
+        <div class="col-md-2 text-md-end fw-bold">
+            Codice SDI
+        </div>
+        <div class="col-md-10">
+            [[cliente.sdi]]
+        </div>
+    </div>
+    <div class="row mb-2" v-if="cliente.banca">
+        <div class="col-md-2 text-md-end fw-bold">
+            Banca
+        </div>
+        <div class="col-md-10">
+            [[cliente.banca]]
+        </div>
+    </div>
+    <div class="row mb-2" v-if="cliente.iban">
+        <div class="col-md-2 text-md-end fw-bold">
+            IBAN
+        </div>
+        <div class="col-md-10">
+            [[cliente.iban]]
+        </div>
+    </div>
+
+    <div class="row mb-2" v-if="cliente.segnalazione">
+        <div class="col-md-2 text-md-end fw-bold">
+            Segnalazione
+        </div>
+        <div class="col-md-10">
+            [[liste.segnalazioni[cliente.segnalazione] ]]
+        </div>
+    </div>
+
+    <div class="row mb-2" v-if="cliente.data">
+        <div class="col-md-2 text-md-end fw-bold">
+            Inserito il
+        </div>
+        <div class="col-md-10">
+            [[formatDate(cliente.data)]]
+        </div>
+    </div>
+    
+    {% if cliente.richieste.all %}<div class="row mb-2">
+        <div class="col-md-2 text-md-end fw-bold">
+            Richieste
+        </div>
+        <div class="col-md-10">
+            {% for richiesta in cliente.richieste.all %}<span class="badge bg-success">{{richiesta}}</span> {% endfor %}
+        </div>
+    </div>{% endif %}
+
+    <div class="mini-card my-3 bg-white" v-if="cliente.inizio_lavori || cliente.data_installazione || cliente.ditta_installatrice">
+        <div class="tipo">Installazione</div>
+        <div class="mb-2" v-if="cliente.inizio_lavori">
+            <strong>
+                Inizio previsto
+            </strong>:
+                [[formatDate(cliente.inizio_lavori)]]
+        </div>
+        <div class="mb-2" v-if="cliente.data_installazione">
+            <strong>
+                Data
+            </strong>:
+                [[formatDate(cliente.data_installazione)]]
+        </div>
+        <div class="mb-2" v-if="cliente.ditta_installatrice">
+            <strong>
+                Ditta
+            </strong>:
+                [[cliente.ditta_installatrice]]
+        </div>
+    </div>
+
+
+    <div class="row mb-2" v-if="cliente.note">
+        <div class="col-md-2 text-md-end fw-bold">
+            Note
+        </div>
+        <div class="col-md-10" v-html="nl2br(cliente.note)"></div>
+    </div>
+    <div class="row mb-2" v-if="cliente.note_private">
+        <div class="col-md-2 text-md-end fw-bold">
+            Note private
+        </div>
+        <div class="col-md-10" v-html="nl2br(cliente.note_private)"></div>
+    </div>
+
+    <div class="mini-card my-3 bg-white" v-if="cliente.altri_dati.length">
+        <div class="tipo">Altri dati</div>
+        <div class="mb-2" v-for="field in cliente.altri_dati">
+            <strong>
+                [[field.label]]
+            </strong>:
+                [[field.value]]
+        </div>
+    </div>
+    
+    
+    </div>
+</div>
+
+
+<div v-if="cliente.editing" class="card">
+    <div class="card-body bg-light">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="c-ragsoc" placeholder="Ragione sociale" v-model="cliente.ragsoc">
+                <label for="c-ragsoc">Ragione sociale</label>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-floating">
+                <input type="text" maxlength="11" class="form-control" id="c-piva" placeholder="Partita IVA" v-model="cliente.piva">
+                <label for="c-piva">P. IVA</label>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-floating">
+                <input type="text" maxlength="16" class="form-control" id="c-cf" placeholder="Codice fiscale" v-model="cliente.cf">
+                <label for="c-cf">Codice fiscale</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 my-3">
+            <div class="form-floating">
+                <input type="tel" class="form-control" id="c-telefono" placeholder="Telefono" v-model="cliente.telefono">
+                <label for="c-telefono">Telefono</label>
+            </div>
+        </div>
+        <div class="col-md-4 my-3">
+            <div class="form-floating">
+                <input type="email" class="form-control" id="c-email" placeholder="Email" v-model="cliente.email">
+                <label for="c-email">Email</label>
+            </div>
+        </div>
+        <div class="col-md-4 my-3">
+            <div class="form-floating">
+                <input type="email" class="form-control" id="c-pec" placeholder="PEC" v-model="cliente.pec">
+                <label for="c-pec">PEC</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 my-3">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="c-citta" placeholder="Città" v-model="cliente.citta" @input="loadComuni(cliente.citta)">
+                <label for="c-citta">Città</label>
+            </div>
+        </div>
+        <div class="col-md-2 my-3">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="c-cap" placeholder="CAP" v-model="cliente.cap">
+                <label for="c-cap">CAP</label>
+            </div>
+        </div>
+        <div class="col-md-4 my-3">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="c-indirizzo" placeholder="Indirizzo" v-model="cliente.indirizzo">
+                <label for="c-indirizzo">Indirizzo</label>
+            </div>
+        </div>
+        <div class="col-md-2 my-3">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="c-provincia" placeholder="Provincia" v-model="cliente.provincia">
+                <label for="c-provincia">Provincia</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 my-3">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="c-banca" placeholder="Banca" v-model="cliente.banca">
+                <label for="c-banca">Banca</label>
+            </div>
+        </div>
+        <div class="col-md-4 my-3">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="c-iban" placeholder="IBAN" v-model="cliente.iban">
+                <label for="c-iban">IBAN</label>
+            </div>
+        </div>
+        <div class="col-md-4 my-3">
+            <div class="form-floating">
+                <input type="text" maxlength="7" class="form-control" id="c-sdi" placeholder="Codice SDI" v-model="cliente.sdi">
+                <label for="c-sdi">Codice SDI</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 my-3">
+            <div class="form-floating">
+                <select class="form-select" v-model="cliente.segnalazione" id="c-segnalazione">
+                    <option v-for="(name, value) in liste.segnalazioni" :value="value">[[name]]</option>
+                </select>
+                <label for="c-segnalazione">Segnalazione</label>
+            </div>
+        </div>
+        <div class="col-md-6 my-3">
+            <div class="form-floating">
+                <input type="date" class="form-control" id="c-data" placeholder="Data" v-model="cliente.data">
+                <label for="c-data">Data</label>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-6 my-3">
+            <div class="form-floating">
+                <textarea class="form-control" style="height: 100px;" id="c-note" placeholder="Note" v-model="cliente.note"></textarea>
+                <label for="c-note">Note</label>
+            </div>
+        </div>
+        <div class="col-md-6 my-3">
+            <div class="form-floating">
+                <textarea class="form-control" style="height: 100px;" id="c-note-private" placeholder="Note private" v-model="cliente.note_private"></textarea>
+                <label for="c-note-private">Note private</label>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <a @click="reloadCliente()" class="btn btn-sm btn-dark close-btn"><i class="far fa-times"></i></a>
+    <a @click="saveCliente('cliente')" class="btn btn-sm btn-success"><i class="far fa-save"></i> Salva</a>
+</div>
+
+
+
+
+
+<h2 class="mt-3 pt-3 fs-4"><a @click="addIndirizzo" class="btn btn-sm btn-warning"><i class="far fa-plus"></i> Indirizzi</a></h2>
+<div class="row">
+    <div class="col-md-6 col-xl-4 mb-3" v-for="(indirizzo,index) in cliente.indirizzi">
+        <div class="card h-100">
+            <div class="card-body" v-if="!indirizzo.editing">
+                <strong>[[indirizzo.indirizzo]]</strong><br>
+                [[indirizzo.cap]] [[indirizzo.citta]] [[indirizzo.provincia]]
+                <a @click="indirizzo.editing=true" class="btn btn-sm btn-light edit-btn"><i class="far fa-pen"></i></a>
+            </div>
+            <div class="card-body" v-if="indirizzo.editing">
+                <div class="form-floating my-3">
+                    <input type="text" class="form-control" id="c-indirizzo" placeholder="Via e n." v-model="indirizzo.indirizzo">
+                    <label for="c-indirizzo">Via e n.</label>
+                </div>
+                <div class="form-floating my-3">
+                    <input type="text" class="form-control" id="c-citta" placeholder="Città" v-model="indirizzo.citta">
+                    <label for="c-citta">Città</label>
+                </div>
+                <div class="form-floating my-3">
+                    <input type="text" class="form-control" id="c-cap" placeholder="CAP" v-model="indirizzo.cap">
+                    <label for="c-cap">CAP</label>
+                </div>
+                <div class="form-floating my-3">
+                    <input type="text" class="form-control" id="c-provincia" placeholder="Provincia" v-model="indirizzo.provincia">
+                    <label for="c-provincia">Provincia</label>
+                </div>
+
+                <a @click="reloadCliente()" class="btn btn-sm btn-dark close-btn"><i class="far fa-times"></i></a>
+                <a @click="deleteIndirizzo(index)" class="btn btn-sm btn-danger delete-btn"><i class="far fa-trash"></i></a>
+                <a @click="saveCliente('indirizzi')" class="btn btn-sm btn-success save-btn"><i class="far fa-save"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<h2 class="mt-3 pt-3 fs-4"><a @click="addPersona" class="btn btn-sm btn-warning"><i class="far fa-plus"></i> Contatti</a></h2>
+<div class="row">
+    <div class="col-md-6 col-xl-4 mb-3" v-for="(persona,index) in cliente.persone">
+        <div class="card h-100">
+            <div class="card-body" v-if="!persona.editing" @dblclick="persona.editing=true">
+                <strong>[[persona.nome]]</strong>&nbsp;<span v-if="persona.mansione">([[persona.mansione]])</span>
+                <div v-if="persona.telefono"><i class="far fa-phone fa-fw"></i> <a :href="'tel:' + persona.telefono">[[persona.telefono]]</a></div>
+                <div v-if="persona.email"><i class="far fa-envelope fa-fw"></i> <a :href="'mailto:' + persona.email">[[persona.email]]</a></div>
+            </div>
+            <div class="card-body" v-if="persona.editing">
+                <input class="fw-bold form-control mb-3" v-model="persona.nome" placeholder="Nome">
+                <input class="form-control mb-3" v-model="persona.mansione" placeholder="Mansione">
+                <div class="input-group mb-3">
+                    <i class="input-group-text far fa-phone"></i>
+                    <input type="tel" v-model="persona.telefono" placeholder="Telefono" class="form-control">
+                </div>
+                <div class="input-group">
+                    <i class="input-group-text far fa-envelope"></i>
+                    <input type="email" v-model="persona.email" placeholder="Email" class="form-control">
+                </div>
+
+                <a @click="reloadCliente()" class="btn btn-sm btn-dark close-btn"><i class="far fa-times"></i></a>
+
+                <div class="justify-content-between d-flex mt-3">
+                    <a @click="saveCliente('persone')" class="btn btn-sm btn-success"><i class="far fa-save"></i> Salva</a>
+                    <a @click="deletePersona(index)" class="btn btn-sm btn-danger "><i class="far fa-trash"></i></a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="mt-3 pt-3 fs-4"><a @click="addAttivita" class="btn btn-sm btn-warning"><i class="far fa-plus"></i> Attività</a></h2>
+
+<div class="row">
+    <div class="col-md-6 col-xl-4 mb-3" v-for="(att, index) in cliente.attivita">
+        <div class="mini-card h-100" v-if="!att.editing" @dblclick="att.editing=true">
+                <strong class="tipo">[[ liste.tipi_attivita[att.tipo] ]]</strong>
+                <p class="description">[[att.descrizione]]</p>
+                <div class="row">
+                    <div class="col"><em>[[ liste.agenti[att.agente] ]]</em></div>
+                    <div class="col text-end">[[formatDate(att.data)]] [[att.ora.slice(0,5)]]</div>
+                </div>
+        </div>
+        <div class="card h-100" v-if="att.editing">
+            <div class="card-body">
+                <select class="form-select mb-3" v-model="att.tipo">
+                    <option v-for="(name, value) in liste.tipi_attivita" :value="value">[[name]]</option>
+                </select>   
+                <textarea class="form-control mb-3" v-model="att.descrizione" placeholder="Descrizione"></textarea>
+                <select class="form-select mb-3" v-model="att.agente">
+                    <option v-for="(name, value) in liste.agenti" :value="value">[[name]]</option>
+                </select>
+                <div class="d-flex">
+                    <input type="date" class="form-control mb-3 me-2" v-model="att.data">
+                    <input type="time" class="form-control mb-3 ms-2" v-model="att.ora">
+
+                </div>
+ 
+                <a @click="reloadCliente()" class="btn btn-sm btn-dark close-btn"><i class="far fa-times"></i></a>
+                <div class="justify-content-between d-flex">
+                    <a @click="saveCliente('attivita')" class="btn btn-sm btn-success"><i class="far fa-save"></i> Salva</a>
+                    <a @click="deleteAttivita(index)" class="btn btn-sm btn-danger "><i class="far fa-trash"></i></a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<h2 class="mt-3 pt-3 fs-4"><a href="{% url 'gestione:offerta_add' cliente.pk %}" class="btn btn-sm btn-warning"><i class="far fa-plus"></i> Offerte</a></h2>
+
+{% if cliente.offerte.exists or offerta_copied %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <tr>
+            <th>Titolo</th>
+            <th>Data</th>
+            <th class="text-end">Importo</th>
+            <th>Azioni</th>
+        </tr>
+        {% for offerta in cliente.offerte.all %}
+        <tr>
+            <td>{% if offerta.confermata %} <i title="Confermata" class="text-success fas fa-fw fa-check-circle"></i> {% endif %} <strong><a href="{% url 'gestione:offerta_edit' cliente.pk offerta.pk %}">{{offerta.titolo|default:"Senza titolo"}}</a></strong></td>
+            <td>{{offerta.data|date:'j.n.Y'|lower}}</td>
+            <td class="text-end">{{offerta.riepilogo.totale_offerta|floatformat:'2g'}}&nbsp;€</td>
+            <td class="text-nowrap">
+                <a href="{% url 'home:offerta_pdf' offerta.pk %}" class="btn btn-sm btn-dark me-3" title="PDF"><i class="far fa-file-pdf"></i></a>
+                <form class="d-inline me-3" title="Copia" action="{% url 'gestione:offerta_copy' cliente.pk offerta.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-success"><i class="far fa-copy"></i></button>
+                </form>
+                <form class="d-inline me-3" action="{% url 'gestione:offerta_copy_other' cliente.pk offerta.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" title="Copia ad altro cliente" class="btn btn-sm btn-warning"><i class="far fa-users"></i></button>
+                </form>
+                <form class="danger d-inline me-3" action="{% url 'gestione:offerta_delete' cliente.pk offerta.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" title="Elimina" class="btn btn-sm btn-danger"><i class="far fa-trash"></i></button>   
+                </form>
+        </tr>
+        {% endfor %}
+        {% if offerta_copied %}
+        <tr>
+            <td><a href="{% url 'home:offerta_pdf' offerta_copied.pk %}">
+                    Vedi l’offerta {{offerta_copied.numero_documento}} di {{offerta_copied.cliente}} da incollare
+                </a>
+            </td>
+            <td>{{offerta_copied.data|date:'j.n.Y'|lower}}</td>
+            <td class="text-end">{{offerta_copied.riepilogo.totale_offerta|floatformat:'2g'}}&nbsp;€</td>
+            <td>
+                <a href="{% url 'gestione:offerta_paste' cliente.id %}" class="btn btn-sm btn-warning me-3" title="Incolla">
+                        <i class="far fa-paste"></i>
+                </a>
+                <a href="{% url 'gestione:offerta_cancel_copy' cliente.id %}" class="btn btn-sm btn-danger" title="Annulla copia">
+                        <i class="fa fa-ban"></i>
+                </a>
+            </td>
+        </tr>
+        {% endif %}
+    </table>
+</div>
+{% endif %}
+
+<h2 class="mt-3 pt-3 border-top"> Foto e documenti</h2>
+<div class="row images">
+    <div class="col-6 col-md-4 col-lg-3 mb-3" v-for="(doc, index) in cliente.documenti">
+        <div class="card h-100 ratio ratio-1x1">
+            <div class="card-body">
+                <a :href="'/media/' + doc.file" target="_blank" :data-fancybox="isImageType(doc) && 'gallery' || null">
+                    <img v-if="isImageType(doc)" :src="'/media/' + doc.file" alt="">
+                    <i v-else class="far fa-file fa-3x"></i>
+                </a>   
+                <textarea type="text" v-model="doc.nome" class="doc-name" rows="2"></textarea>
+                <a @click="deleteDocumento(index)" class="btn btn-sm btn-danger delete-btn"><i class="far fa-trash"></i></a>
+                <a @click="saveCliente('documenti')" class="btn btn-sm btn-success save-btn"><i class="far fa-save"></i></a>
+            </div>
+        
+        </div>
+    </div>
+</div>
+
+<form action="/target" class="dropzone" id="upload-docs">
+    {% csrf_token %}
+</form>
+
+
+</div>
+</div>
+{% endblock %}
+
+
+
+
+{% block extra_js %}
+    <script>
+
+
+document.addEventListener('DOMContentLoaded', function() {
+        Fancybox.bind()
+
+        axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
+        const cliente = JSON.parse(document.getElementById('cliente-json').textContent)
+        const liste = JSON.parse(document.getElementById('liste-json').textContent)
+
+
+        const app = Vue.createApp({
+            delimiters: ["[[", "]]"],
+
+            data() {
+                return {
+                    cliente: cliente,
+                    liste: liste
+                }
+
+            },
+            mounted() {
+                console.log(this.cliente)
+            },
+            created() {
+                
+            },
+            methods: {
+                addPersona() {
+                    this.cliente.persone.unshift({
+                        nome: '',
+                        mansione: '',
+                        telefono: '',
+                        email: '',
+                        editing: true,
+                        pk: null
+                    })
+                },
+                addIndirizzo() {
+                    this.cliente.indirizzi.unshift({
+                        indirizzo: '',
+                        cap: '',
+                        citta: '',
+                        provincia: '',
+                        editing: true,
+                        pk: null
+                    })
+                },
+                deleteIndirizzo(index) {
+                    this.cliente.indirizzi.splice(index, 1)
+                    this.saveCliente('indirizzi')
+                },
+
+                isImageType(doc) {
+                    return doc.file.match(/\.(jpeg|jpg|gif|png)$/)
+                },
+                deleteDocumento(index) {
+                    this.cliente.documenti.splice(index, 1)
+                    this.saveCliente('documenti')
+                },
+                saveCliente(section=null) {
+                    cliente.sectionToSave = section
+                    axios.post('{% url "gestione:cliente_edit" cliente.pk %}', this.cliente) 
+                        .then(response => {
+                            this.reloadCliente()
+                        })
+                        .catch(error => {
+                            console.log(error)
+                        })
+                },
+                reloadCliente() {
+                    axios.get('{% url "gestione:cliente_view" cliente.pk %}')
+                        .then(response => {
+                            this.cliente = response.data
+                            this.cliente.editing = false
+                            this.cliente.persone.forEach(persona => {
+                                persona.editing = false
+                            })
+                            this.cliente.attivita.forEach(att => {
+                                att.editing = false
+                            })
+                        })
+                        .catch(error => {
+                            console.log(error)
+                        })
+                },
+                deletePersona(index) {
+                    this.cliente.persone.splice(index, 1)
+                    this.saveCliente('persone')
+                },
+                addAttivita() {
+                    this.cliente.attivita.unshift({
+                        tipo: Object.keys(liste.tipi_attivita)[0],
+                        descrizione: '',
+                        agente: Object.keys(liste.agenti)[1],
+                        data: new Date().toISOString().slice(0, 10),
+                        ora: new Date().toLocaleTimeString().slice(0, 5),
+                        //dataora: '2024-04-25T22:55:03.188+02',
+                        editing: true,
+                        pk: null
+                    })
+                },
+                deleteAttivita(index) {
+                    this.cliente.attivita.splice(index, 1)
+                    this.saveCliente('attivita')
+                },
+                formatDate(date) {
+                // Use internationalization API to format date
+                    return new Date(date).toLocaleString('it', {
+                        year: 'numeric',
+                        month: 'numeric',
+                        day: 'numeric',
+                    
+                    })
+                },
+                nl2br(str) {
+                    return str.replace(/(?:\r\n|\r|\n)/g, '<br>')
+                },
+                loadComuni(query) {
+                    if (query.length < 3) {
+                        riga.results = []
+                        return
+                    }
+                    this.searching = true
+                    fetch(`{% url 'home:cerca_prodotti' %}?q=${query}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            riga.results = data
+                            this.searching = false
+                        })
+                },
+                handleClickOutside(el) {
+                    alert('Clicked outside!', JSON.stringify(el));
+                },
+
+            },
+        })
+
+    // Register the click-outside directive
+    app.directive('click-outside', {
+      beforeMount(el, binding) {
+        el.clickOutsideEvent = function(event) {
+          // Check if the clicked element is outside the target element
+          if (!(el === event.target || el.contains(event.target))) {
+            // If it is, call the provided method
+            if (typeof binding.value === 'function') {
+              binding.value(event);
+            }
+          }
+        };
+        // Attach the event listener to the document
+        document.addEventListener('click', el.clickOutsideEvent);
+      },
+      unmounted(el) {
+        // Remove the event listener when the element is unmounted
+        document.removeEventListener('click', el.clickOutsideEvent);
+      }
+    });
+
+
+        window.vueApp = app.mount('#app')
+
+
+
+        let uploadDocsZone = new Dropzone("#upload-docs", { url: "edit/"})
+        uploadDocsZone.on("success", function(file, response) {
+            console.log(response)
+            console.log(window.vueApp.cliente.documenti)
+            window.vueApp.cliente.documenti.push(response)
+        })
+
+
+        document.querySelectorAll('form.danger').forEach(form => {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault()
+                if (confirm('Sei sicuro di voler eliminare?')) {
+                    this.submit()
+                }
+            })
+        })
+})
+
+
+    </script>
+{% endblock %}

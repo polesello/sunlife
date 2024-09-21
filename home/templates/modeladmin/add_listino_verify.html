@@ -1,0 +1,73 @@
+{% extends "wagtailadmin/base.html" %}
+{% block titletag %}Aggiungi listino{% endblock %}
+
+
+{% block content %}
+    {% include "wagtailadmin/shared/header.html" with title="Aggiungi listino" icon="upload" %}
+
+    <div class="nice-padding">
+
+
+        
+
+
+<div class="w-tabs" data-tabs="">
+    <div role="tablist" class="w-tabs__list">
+        
+        <a href="{% url 'admin_add_listino_1' %}" class="w-tabs__tab">Carica file Excel</a>
+        <a href="{% url 'admin_add_listino_2' listino.pk %}" class="w-tabs__tab">Selezione colonne</a>
+        <a aria-selected="true" href="bb" class="w-tabs__tab">Verifica</a>
+        <a href="bb" class="w-tabs__tab">Fine</a>
+
+    </div>
+</div>
+
+
+
+{% if prodotti %}
+<div class="help-block help-info">
+    <svg class="icon icon-help icon" aria-hidden="true"><use href="#icon-help"></use></svg>
+
+    <p>{{prodotti|length}} prodotti</p>
+</div>
+
+    <table class="listing">
+        <thead>
+            <tr>
+                <th>Codice</th>
+                <th>Descrizione</th>
+                <th>Prezzo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in prodotti %}                  
+                <tr>
+                    <td>{{row.codice}}</td>
+                    <td>{{row.descrizione}}</td>
+                    <td>{{row.prezzo}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="codice_index" value="{{codice_index}}">
+        <input type="hidden" name="descrizione_index" value="{{descrizione_index}}">
+        <input type="hidden" name="prezzo_index" value="{{prezzo_index}}">
+        <input type="submit" value="Carica {{prodotti|length}} prodotti {{listino.marchio}}" class="button" name="save">
+    </form>
+{% else %}
+<div class="help-block help-critical">
+    <svg class="icon icon-warning icon" aria-hidden="true"><use href="#icon-warning"></use></svg>
+
+    <p>Non ci sono prodotti, riprova a <a href="{% url 'admin_add_listino_2' listino.pk %}">selezionare le colonne</a>.</p>
+</div>
+{% endif %}
+                      
+   
+
+    </div>
+
+{% endblock %}

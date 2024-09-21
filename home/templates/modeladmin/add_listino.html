@@ -1,0 +1,36 @@
+{% extends "wagtailadmin/base.html" %}
+{% block titletag %}Aggiungi listino{% endblock %}
+
+
+{% block content %}
+    {% include "wagtailadmin/shared/header.html" with title="Aggiungi listino" icon="upload" %}
+
+    <div class="nice-padding">
+
+        <div class="w-tabs" data-tabs="" style="margin-bottom:30px">
+            <div role="tablist" class="w-tabs__list">
+                
+                <a aria-selected="true" href="{% url 'admin_add_listino_1' %}" class="w-tabs__tab">Carica file Excel</a>
+                <a href="" class="w-tabs__tab">Selezione colonne</a>
+                <a href="" class="w-tabs__tab">Verifica</a>
+                <a href="" class="w-tabs__tab">Fine</a>
+        
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="w-field__wrapper">
+                    <label class="w-field__label" for="{{field.id_for_label}}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <input name="update" type="submit" value="Carica" class="button">
+        </form>
+
+
+    </div>
+
+{% endblock %}

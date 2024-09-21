@@ -1,0 +1,28 @@
+{% extends "modeladmin/inspect.html" %}
+{% load static %}
+
+
+{% block header %}
+        {% include "wagtailadmin/shared/header_with_locale_selector.html" with title=view.get_page_subtitle icon=view.header_icon %}
+    {% endblock %}
+
+{% block fields_output %}
+
+
+<table class="listing">
+    <tr>
+        <th>Codice</th>
+        <th>Descrizione</th>
+        <th>Prezzo</th>
+    </tr>
+    {% for rigo in view.instance.righe.all %}
+        <tr{% if rigo.colore %} style="background-color:{{rigo.colore}}"{% endif %}>
+            <td>{{rigo.codice}}</td>
+            <td>{{rigo.descrizione}}</td>
+            <td>{{rigo.prezzo}}</td>
+        </tr>
+    {% endfor %}
+    
+</table>
+
+{% endblock %}

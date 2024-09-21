@@ -1,0 +1,101 @@
+{% extends "wagtailadmin/base.html" %}
+{% block titletag %}Aggiungi listino{% endblock %}
+
+
+{% block content %}
+    {% include "wagtailadmin/shared/header.html" with title="Aggiungi listino" icon="upload" %}
+
+    <div class="nice-padding">
+
+
+        
+
+
+<div class="w-tabs" data-tabs="">
+    <div role="tablist" class="w-tabs__list">
+        
+        <a href="{% url 'admin_add_listino_1' %}" class="w-tabs__tab">Carica file Excel</a>
+        <a aria-selected="true" href="bb" class="w-tabs__tab">Selezione colonne</a>
+        <a href="bb" class="w-tabs__tab">Verifica</a>
+        <a href="bb" class="w-tabs__tab">Fine</a>
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+   
+                        
+<div class="help-block help-info">
+    <svg class="icon icon-help icon" aria-hidden="true"><use href="#icon-help"></use></svg>
+
+    <p>Seleziona le colonne in cui sono presenti codice, descrizione e prezzo.</p>
+    <p>Le righe incomplete (es. intestazioni) non verranno importate.</p>
+</div>
+                        <div style="overflow: scroll;">
+                        <form method="post">{% csrf_token %}
+                            <input type="hidden" name="filename" value="{{filename}}">
+                            <input type="hidden" name="marchio" value="{{marchio.id}}">
+                                <table class="listing">
+                                    <thead>
+                                        <tr>
+                                        {% for row in table_data.0 %}
+                                            <td>
+                                                <div style="position: relative; height: 50px;">
+                                                <!-- <label><input name="col-{{forloop.counter0}}" type="radio" value=""> Salta</label><br>
+                                                <label><input name="col-{{forloop.counter0}}" type="radio" value="codice"> Codice</label><br>
+                                                <label><input name="col-{{forloop.counter0}}" type="radio" value="descrizione"> Descrizione</label><br>
+                                                <label><input name="col-{{forloop.counter0}}" type="radio" value="prezzo"> Prezzo</label> -->
+                                            <select class="rotated" name="col-{{forloop.counter0}}">
+                                                <option value="">Salta</option>
+                                                <option value="codice"{% if forloop.counter == 1 %} selected{% endif %}>Codice</option>
+                                                <option value="descrizione"{% if forloop.counter == 2 %} selected{% endif %}>Descrizione</option>
+                                                <option value="prezzo"{% if forloop.counter == 3 %} selected{% endif %}>Prezzo</option>
+                                            </select>
+                                        </div>
+                                            </td>
+                                        {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in table_data %}                  
+                                            <tr>
+                                             {% for field in row %}
+                                                 <td>{{field|default:''}}</td>
+                                             {% endfor %}   
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+        
+                            <button type="submit" class="button" name="select">Seleziona</button>
+                        </form>
+                        </div>
+   
+
+    </div>
+
+    <style>
+        select.rotated {
+ 
+            transform: rotate(-45deg);
+            xxwidth: 200px;
+            xxheight: 20px;
+
+            position: absolute;
+
+            font-size: 14px;
+            min-height: auto;
+            max-width: none;
+            padding: 2px 5px;
+        }
+    </style>
+{% endblock %}

@@ -1,0 +1,3 @@
+.w-form-width, .w-field-row, .w-field__wrapper, .w-panel__wrapper{
+    max-width: none;
+}

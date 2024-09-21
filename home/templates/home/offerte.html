@@ -1,0 +1,98 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+{% if perms.home.change_offerta and 0 %}
+    <p><a class="btn btn-dark btn-sm" href="https://wa.me/3497149936?text={{ request.build_absolute_uri }}{% url 'home:cliente_start' cliente.pk cliente.token %}">Link Whatsapp</a></p>
+{% endif %}
+    <h2>Offerte</h2>
+
+    <div class="row">
+        {% for offerta in offerte %}
+
+        {% if offerta.visibile or perms.home.change_offerta %}
+        <div class="col-lg-6 mb-4">
+                <div class="card bg-light h-100{% if not offerta.visibile %} blurred{% endif %}">
+                    <div class="card-body">
+                        <div class="text-muted small">
+                            {{offerta.data|date:'j F Y'|lower}}
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <h2 class="h4"><a target="_blank" class="btn btn-dark text-start" href="{% url 'home:offerta_pdf' offerta.pk %}"><i class="far fa-fw fa-file-pdf"></i>{{ offerta.titolo }}</a></h2>
+
+                                {% if perms.home.change_offerta %}
+                                <a data-bs-toggle="tooltip" data-bs-placement="top" title="Copia link" class="btn btn-warning copy-btn" data-url="{{request.scheme}}://{{request.get_host}}{% url 'home:cliente_start_offerta' cliente.pk cliente.token offerta.pk %}"><i class="far fa-copy"></i></a>
+                                {% endif %}
+
+                            </div>
+                            <div class="col-lg-4 text-end text-nowrap h4">
+                                    {{offerta.riepilogo.totale_offerta|floatformat:'2g'}}&nbsp;€
+                            </div>
+                        </div>
+            
+                        {% if 0 and offerta.presentazione %}<br>
+                            <a class="btn btn-link" href="{% url 'home:offerta_presentazione_pdf' offerta.pk %}"><i class="far fa-fw fa-file-pdf"></i><s> Presentazione</s></a>
+                        {% endif %}
+                        {% if perms.home.change_offerta %}
+                            <a class="btn btn-link" href="{% url 'home:offerta_presentazione_edit' offerta.pk %}"><i class="far fa-fw fa-pen"></i> {% if offerta.presentazione %}Modifica{% else %}Aggiungi{% endif %} presentazione</a>
+                        {% endif %}
+                        {% for compilato in offerta.docs_da_firmare.all %}
+                        <br>
+                        <a class="btn btn-link" href="{% url 'home:accettazione_offerta' offerta.pk compilato.pk %}"><i class="far fa-fw fa-signature"></i> {{ compilato }}</a>
+                        {% endfor %}
+                        {% for all in offerta.allegati.all %}
+                        <br>
+                        <a target="_blank" class="btn btn-link" href="{{all.documento.url}}"><i class="far fa-fw fa-circle-info"></i> {{ all }}</a>
+                        {% endfor %}
+
+
+                        {% if perms.home.change_offerta %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="form-check form-switch">
+                                <input type="hidden" name="visibile" value="{{offerta.pk}}">
+                                <input class="form-check-input" type="checkbox" role="switch" value="{{offerta.pk}}" id="visibile-{{forloop.counter}}"{% if offerta.visibile %} checked{% endif %}>
+                                <label class="form-check-label" for="visibile-{{forloop.counter}}">{% if offerta.visibile %}Visibile{% else %}Nascosta{% endif %}</label>
+                            </div>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+<style>
+.blurred {
+    filter: grayscale(1);
+    opacity: .7;
+}
+</style>
+<script>
+    document.querySelectorAll('[role=switch]').forEach(function(el) {
+        el.addEventListener('change', function() {
+            this.form.submit()
+        });
+    })
+
+    document.querySelectorAll('.copy-btn').forEach(function(el) {
+        el.addEventListener('click', function() {
+            const url = this.dataset.url
+            navigator.clipboard.writeText(url).then(function() {
+                el.classList.add('btn-success')
+                el.classList.remove('btn-warning')
+                setTimeout(function() {
+                    el.classList.remove('btn-success')
+                    el.classList.add('btn-warning')
+                }, 1000)
+            })
+        });
+    })
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %}

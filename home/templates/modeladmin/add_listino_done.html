@@ -1,0 +1,31 @@
+{% extends "wagtailadmin/base.html" %}
+{% block titletag %}Aggiungi listino{% endblock %}
+
+
+{% block content %}
+    {% include "wagtailadmin/shared/header.html" with title="Aggiungi listino" icon="upload" %}
+
+    <div class="nice-padding">
+
+
+        
+
+
+<div class="w-tabs" data-tabs="">
+    <div role="tablist" class="w-tabs__list">
+        
+        <a href="{% url 'admin_add_listino_1' %}" class="w-tabs__tab">Carica file Excel</a>
+        <a href="bb" class="w-tabs__tab">Selezione colonne</a>
+        <a href="bb" class="w-tabs__tab">Verifica</a>
+        <a aria-selected="true" href="bb" class="w-tabs__tab">Fine</a>
+
+    </div>
+</div>
+
+
+<div class="help-block help-info">
+    <svg class="icon icon-help icon" aria-hidden="true"><use href="#icon-help"></use></svg>
+
+    <p>Sono stati caricati {{prodotti}} prodotti.</p>
+</div> 
+{% endblock %}

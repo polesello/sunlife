@@ -1,0 +1,84 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+
+    <h1>I miei dati</h1>
+
+    <div class="row">
+        <div class="col-lg-6 h5 text-end lh-base bg-light p-3">
+            <p><strong>{{cliente.ragsoc}}</strong>
+        {% if cliente.indirizzo %}<br>{{cliente.indirizzo}}{% endif %}
+        <br>{{cliente.cap}} {{cliente.citta}} ({{cliente.provincia}})
+        {% if cliente.stato != 'Italia' %}<br>{{cliente.stato}}{% endif %}</p>
+        </div>
+
+        <div class="col-lg-6 p-3">
+            {% if cliente.telefono %}<p class="mb-1">Telefono: {{cliente.telefono}}</p>{% endif %}
+            {% if cliente.email %}<p class="mb-1">Mail: {{cliente.email}}</p>{% endif %}
+            {% if cliente.pec %}<p class="mb-1">PEC: {{cliente.pec}}</p>{% endif %}
+            {% if cliente.piva %}<p class="mb-1">P. IVA {{cliente.piva}}</p>{% endif %}
+            {% if cliente.cf %}<p class="mb-1">C. F. {{cliente.cf}}</p>{% endif %}
+            {% if cliente.banca %}<p class="mb-1">Banca: {{cliente.banca}}</p>{% endif %}
+            {% if cliente.iban %}<p class="mb-1">IBAN: {{cliente.iban}}</p>{% endif %}
+        </div>
+    </div>   
+
+    {% if cliente.indirizzi.exists %}
+    <h2>Indirizzi aggiuntivi</h2>
+    <div class="row">
+        {% for indirizzo in cliente.indirizzi.all %}
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <strong>{{indirizzo.indirizzo}}</strong><br>
+                        {{indirizzo.cap}} {{indirizzo.citta}} ({{indirizzo.provincia}})
+                    </div>
+                </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if cliente.persone.exists %}
+    <h2>Contatti</h2>
+    <div class="row">
+        {% for persona in cliente.persone.all %}
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+            <strong>{{persona.nome}}</strong>{% if persona.mansione %} ({{persona.mansione}}){% endif %} <br>
+            {% if persona.telefono %}<i class="far fa-phone fa-fw"></i> {{persona.telefono}} <br>{% endif %}
+            {% if persona.email %}<i class="far fa-envelope fa-fw"></i> {{persona.email}}{% endif %}
+                    </div>
+                </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row my-4">
+        <div class="col-lg-6 offset-lg-3">
+
+            <h2 class="text-center"><button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#variazione-form">Dati non corretti? <i class="fas fa-caret-down"></i></button></h2>
+            {% for s in cliente.variazioni.all %}
+                <p><span class="badge bg-danger">{{s.data|date:'j.n.Y'}}</span>
+                {{s.descrizione|truncatewords:20}}
+                </p>
+            {% endfor %}
+            <div class="collapse" id="variazione-form">
+
+                <div class="bg-warning p-3">
+                    <p>Se hai notato degli errori nei tuoi dati, puoi segnalarceli qui sotto. Ti ringraziamo per la collaborazione.</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <textarea required name="descrizione" id="field-descrizione" class="form-control mb-3" rows="5"></textarea>
+                        <input type="submit" name="save" class="btn btn-success" value="Modifica i miei dati">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    
+{% endblock %}

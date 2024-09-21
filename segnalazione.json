@@ -1,0 +1,298 @@
+[
+{
+    "model": "sito.segnalazione",
+    "pk": 1,
+    "fields": {
+        "nome": "Preventivi.it",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 3,
+    "fields": {
+        "nome": "Negozi Aperti Azzano 7/2016",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 5,
+    "fields": {
+        "nome": "Mercato Azzano Decimo 2016",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 6,
+    "fields": {
+        "nome": "Telefonato o passato in ufficio",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 8,
+    "fields": {
+        "nome": "Mescoli",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 9,
+    "fields": {
+        "nome": "Fiera San Giacomo Maniago 7/2016",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 11,
+    "fields": {
+        "nome": "Amici",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 13,
+    "fields": {
+        "nome": "Cliente Sunlife",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 14,
+    "fields": {
+        "nome": "Ex clienti Arnaldo",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 15,
+    "fields": {
+        "nome": "RISCALDAMENTO 365 - HOMEDAL",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 16,
+    "fields": {
+        "nome": "ClientiPerTe",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 17,
+    "fields": {
+        "nome": "SAGRA Pramaggiore 4/2016",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 18,
+    "fields": {
+        "nome": "SAGRA Settimo 6/2016",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 19,
+    "fields": {
+        "nome": "Mercato Sacile 2016",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 23,
+    "fields": {
+        "nome": "Altro",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 24,
+    "fields": {
+        "nome": "Fiera Portogruaro 11/2015",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 25,
+    "fields": {
+        "nome": "Mercato Azzano Decimo 2015",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 26,
+    "fields": {
+        "nome": "Mercato Sacile 2015",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 27,
+    "fields": {
+        "nome": "Fiera Godega Sant'Urbano 2016",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 29,
+    "fields": {
+        "nome": "Instapro",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 30,
+    "fields": {
+        "nome": "Ideal Clima",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 31,
+    "fields": {
+        "nome": "Festa funghi Budoia 2016",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 32,
+    "fields": {
+        "nome": "Fiera Longarone RiCostruire 2018",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 33,
+    "fields": {
+        "nome": "Fiera PN EcoCasa 2018",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 34,
+    "fields": {
+        "nome": "Truck Day Professional",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 35,
+    "fields": {
+        "nome": "Sagra Casarsa 2018",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 36,
+    "fields": {
+        "nome": "MIORIN",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 37,
+    "fields": {
+        "nome": "MANIFESTAZIONI 2018",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 38,
+    "fields": {
+        "nome": "FISTAROL",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 39,
+    "fields": {
+        "nome": "MANIFESTAZIONI 2016",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 40,
+    "fields": {
+        "nome": "MANIFESTAZIONI 2017",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 41,
+    "fields": {
+        "nome": "MANIFESTAZIONI 2015",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 42,
+    "fields": {
+        "nome": "MANIFESTAZIONI 2019",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 44,
+    "fields": {
+        "nome": "MANIFESTAZIONI 2020",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 45,
+    "fields": {
+        "nome": "MANIFESTAZIONI 2021",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 46,
+    "fields": {
+        "nome": "FINESTRA CONNESSA",
+        "azienda": 2
+    }
+},
+{
+    "model": "sito.segnalazione",
+    "pk": 47,
+    "fields": {
+        "nome": "Habitissimo",
+        "azienda": 2
+    }
+}
+]

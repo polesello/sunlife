@@ -1,0 +1,8 @@
+{% load extra %}
+{% if items.has_other_pages %}
+<ul class="pagination justify-content-center my-3">
+  {% for p in page_range %}
+  <li class="page-item{% if p == items.number %} active{% elif p == '...' %} disabled{% endif %}"><a class="page-link" href="{% add_get page=p %}">{{p}}</a></li>
+  {% endfor %}
+</ul>
+{% endif %}

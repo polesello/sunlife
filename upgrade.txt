@@ -1,0 +1,36 @@
+from home.models import Offerta
+from django.db.models import F
+Offerta.objects.filter(mostra_banca__gt=0).update(banca=F('mostra_banca'))
+
+
+3478
+
+SUL SERVER VECCHIO
+./manage.py dumpdata --exclude sito.azienda  --exclude contenttypes   --exclude auth.permission  --indent 4 > sito.json
+
+
+./manage.py dumpdata sito.documentocliente > doc.json
+
+
+
+SUL SERVER NUOVO
+
+scp nello@stilbagno.com:/home/nello/sunlife/sito.json .
+
+sed -i 's/"sito./"home./g' sito.json
+
+importare prima il modello tiporichiesta e segnalazione
+
+./manage.py fix_dati_clienti
+
+
+delete home.listino pk 178 e 179
+
+
+./manage.py loaddata --ignorenonexistent --settings=sunlife.settings.production sito.json 
+
+
+esportare i documenti
+"data_aggiornamento": null --> "data_aggiornamento": "2000-01-01"
+
+./manage.py loaddata -i doc.json

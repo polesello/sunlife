@@ -1,0 +1,604 @@
+{% extends "wagtailadmin/base.html" %}
+{% block titletag %}{{cliente}}{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script src="https://kit.fontawesome.com/51f11f635e.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.10.2/Sortable.min.js"></script>
+<script src="https://www.unpkg.com/vuedraggable@4.1.0/dist/vuedraggable.umd.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+{% endblock %}
+
+{% block content %}
+
+{% include "wagtailadmin/shared/header.html" with title=offerta icon="doc-full" %}
+
+<div class="px-4">
+
+{{ offerta_json|json_script:"offerta-json" }}
+{{ cliente_json|json_script:"cliente-json" }}
+{{ aliquote_iva|json_script:"aliquote-iva" }}
+
+
+<style>
+    #offertaTable input[type="number"], #offertaTable input[type="text"], #offertaTable textarea, #offertaTable select {
+        border: 1px solid #ddd;
+        background-color: #f8f8f8;
+        font-size: inherit;
+        padding: 0 3px;
+        min-height: 0;
+    }
+
+    .search-results {
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ccc;
+        z-index: 1000;
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .search-results li {
+        padding: 3px;
+        cursor: pointer;
+    }
+    .search-results li:hover {
+        background-color: #f8f8f8;
+    }
+    .table td {
+        background-color: inherit;
+    }
+    input[type="color"] {
+        width: 0;
+        height: 0;
+        opacity: 0;
+    }
+
+    select {
+        -webkit-appearance: auto;
+        appearance: auto;
+        width: 100px;
+    }
+    .drag-me {
+        cursor: grab !important;
+    }
+
+    .edit-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: none;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+    .delete-btn {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+    }
+    .save-btn {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+    }
+
+    .card:hover .edit-btn {
+        display: block;
+    }
+
+    .sortable-chosen {
+        background-color: #f8f8f8;
+    }
+
+</style>
+
+
+<div id="app">
+
+
+
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <p><a class="btn btn-sm btn-warning" href="{% url 'gestione:cliente_view' offerta.cliente.pk %}"><i class="far fa-arrow-left"></i>  {{offerta.cliente}}</a></p>
+
+                {{cliente.indirizzo}}<br>
+                {{cliente.cap}} {{cliente.citta}} ({{cliente.provincia}})<br>
+                {% if cliente.telefono %}<i class="far fa-phone fa-fw"></i> {{cliente.telefono}}<br>{% endif %}
+                {% if cliente.email %} <i class="far fa-envelope fa-fw"></i> {{cliente.email}}<br>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div v-if="!offerta.editing" class="card">
+    <div class="card-body bg-light">
+        <a @click="offerta.editing=true" class="btn btn-sm btn-light edit-btn"><i class="far fa-pen"></i></a>
+
+
+    <p><a href="{% url 'home:offerta_pdf' offerta.pk %}" class="btn btn-sm btn-dark">PDF <i class="far fa-file-pdf"></i></a> Offerta n. <strong>[[offerta.numero_documento]]</strong> del <strong>[[offerta.data]]</strong></p>
+    <p>Validità: <strong>[[offerta.validita]] giorni</strong></p>
+    <p v-if="offerta.pagamento">Pagamento: <strong>[[offerta.pagamento]]</strong></p>
+    <p>Destinazione: <strong>[[offerta.indirizzo ? offerta.indirizzo : 'Indirizzo principale']]</strong></p>
+    <p v-if="offerta.termine_consegna">Termine consegna: <strong>[[offerta.termine_consegna]] giorni</strong></p>
+    <p v-if="offerta.spedizione">Modalità spedizione: <strong>[[offerta.spedizione]]</strong></p>
+    <p v-if="offerta.esclusioni">Esclusioni: <strong>[[offerta.esclusioni]]</strong></p>
+    <p v-if="offerta.note">Note: <strong v-html="nl2br(offerta.note)"></strong></p>
+    <p v-if="offerta.note_admin">Note private: <strong>[[offerta.note_admin]]</strong></p>
+    <p>Visibile al cliente? <strong>[[offerta.visibile ? 'Sì' : 'No']]</strong></p>
+    
+    </div>
+</div>
+
+
+<div v-if="offerta.editing" class="card">
+    <div class="card-body bg-light">
+        <a @click="reloadOfferta()" class="btn btn-sm btn-dark close-btn"><i class="far fa-times"></i></a>
+
+        <a @click="saveOfferta()" class="btn btn-sm btn-success save-btn"><i class="far fa-save"></i></a>
+
+        <div class="row">
+            <div class="col-lg-8 mb-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="c-titolo" placeholder="Titolo" v-model="offerta.titolo">
+                    <label for="c-ragsoc">Titolo</label>
+                </div>
+            </div>
+            <div class="col-lg-2 mb-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="c-numero_documento" placeholder="Numero documento" v-model="offerta.numero_documento">
+                    <label for="c-numero_documento">Numero documento</label>
+                </div>
+            </div>
+            <div class="col-lg-2 mb-3">
+                <div class="form-block">
+                    <input type="checkbox" id="c-confermata" placeholder="Confermata" v-model="offerta.confermata">
+                    <label for="c-confermata">Confermata</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 mb-3">
+                <div class="form-floating">
+                    <input type="date" class="form-control" id="c-data" placeholder="Data" v-model="offerta.data">
+                    <label for="c-data">Data</label>
+                </div>
+            </div>
+            <div class="col-lg-2 mb-3">
+                <div class="form-floating">
+                    <input type="number" class="form-control" id="c-validita" placeholder="Validità" v-model="offerta.validita" min="1">
+                    <label for="c-validita">Validità</label>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="c-pagamento" placeholder="Pagamento" v-model="offerta.pagamento">
+                    <label for="c-pagamento">Pagamento</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 mb-3">
+                <div class="form-floating">
+                    <select class="form-select" id="c-indirizzo" v-model.number="offerta.indirizzo">
+                        <option value="">Indirizzo principale</option>
+                        <option v-for="indirizzo in cliente.indirizzi" :value="indirizzo.pk">[[indirizzo.indirizzo]] - [[indirizzo.citta]] ([[indirizzo.provincia]])</option>
+                        </option>
+                    </select>
+                    <label for="c-indirizzo">Destinazione</label>
+                </div>
+            </div>
+            <div class="col-lg-2 mb-3">
+                <div class="form-floating">
+                    <input type="number" class="form-control" id="c-termine_consegna" placeholder="Termine consegna" v-model="offerta.termine_consegna" min="1">
+                    <label for="c-termine_consegna">Termine consegna</label>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="c-spedizione" placeholder="Spedizione" v-model="offerta.spedizione">
+                    <label for="c-spedizione">Modalità spedizione</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4 mb-3">
+                <div class="form-block">
+                    <input type="checkbox" id="c-nascondi_sconti" placeholder="Nascondi sconti" v-model="offerta.nascondi_sconti">
+                    <label for="c-nascondi_sconti">Nascondi sconti</label>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-3">
+                <div class="form-block">
+                    <input type="checkbox" id="c-nascondi_prezzi" placeholder="Nascondi prezzi" v-model="offerta.nascondi_prezzi">
+                    <label for="c-nascondi_prezzi">Nascondi prezzi</label>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-3">
+                <div class="form-block">
+                    <input type="checkbox" id="c-nascondi_codici" placeholder="Nascondi codici" v-model="offerta.nascondi_codici">
+                    <label for="c-nascondi_codici">Nascondi codici</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4 mb-3">
+                <div class="form-floating">
+                    <textarea class="form-control" id="c-esclusioni" placeholder="Esclusioni" v-model="offerta.esclusioni" style="height: 100px;"></textarea>
+                    <label for="c-esclusioni">Esclusioni</label>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-3">
+                <div class="form-floating">
+                    <textarea class="form-control" id="c-note" placeholder="Note" v-model="offerta.note"  style="height: 100px;"></textarea>
+                    <label for="c-note">Note</label>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-3">
+                <div class="form-floating">
+                    <textarea class="form-control" id="c-note_admin" placeholder="Note private" v-model="offerta.note_admin" style="height: 100px;"></textarea>
+                    <label for="c-note_admin">Note private</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 mb-3">
+                <div class="form-block">
+                    <input type="checkbox" id="c-visibile" placeholder="Visibile" v-model="offerta.visibile">
+                    <label for="c-visibile">Visibile al cliente</label>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-3">
+                <div class="form-block">
+                    <input type="checkbox" id="c-mostra_totale" placeholder="Mostra totale" v-model="offerta.mostra_totale">
+                    <label for="c-mostra_totale">Mostra totale</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+    <!-- default 6 pastel colours -->
+<datalist id="colori">
+    <option>#ffffff</option>
+    <option>#f2c4d5</option>
+    <option>#f4c984</option>
+    <option>#f1df94</option>
+    <option>#cde1b8</option>
+    <option>#bed4e3</option>
+    <option>#d7c0d0</option>
+</datalist>
+
+<div class="table-responsive mt-4">
+    <table class="table small table-fixed" id="offertaTable">
+    <thead>
+        <tr>
+            <th colspan="7" class=" bg-light text-end">Sconti:
+                <input style="width: 50px;" id="global-sconto-1" class="text-end me-2 border bg-white" type="number" step=".1" min="0" max="100">
+                <input style="width: 50px;" id="global-sconto-2" class="text-end me-2 border bg-white" type="number" step=".1" min="0" max="100">
+                <input style="width: 50px;" id="global-sconto-3" class="text-end me-2 border bg-white" type="number" step=".1" min="0" max="100">
+                <input style="width: 50px;" id="global-sconto-4" class="text-end me-2 border bg-white" type="number" step=".1" min="0" max="100">
+                <button type="button" @click="setGlobalSconto()" class="btn btn-sm btn-dark"><i class="far fa-arrow-down"></i></button>
+            </th>
+            <th colspan="3" class="text-end bg-light">IVA
+                <select id="global-iva" class="me-2 bg-white border">
+                    <option v-for="iva in aliquote_iva" :value="iva[0]">[[ iva[1] ]]</option>
+                </select>
+                <button type="button" @click="setGlobalIva()" class="btn btn-sm btn-dark"><i class="far fa-arrow-down"></i></button>
+
+            </th>
+            
+        </tr>
+    <tr>
+        <th style="width: 160px;"></th>
+        <th>Codice</th>
+        <th style="width:60%">Descrizione</th>
+        <th>UM</th>
+        <th>Q.tà</th>
+            <th>P.&nbsp;lordo</th>
+            <th>Sconti&nbsp;%</th>
+            <th>Netto</th>
+            <th>Totale</th>
+        <th>IVA</th>
+    </tr>
+    </thead>
+
+    <draggable 
+    direction="vertical"
+    v-model="offerta.righe" 
+    tag="tbody"
+    id="offertaRighi"
+    handle=".drag-me"
+    @end="resetSortOrder"
+    item-key="pk">
+    <template #item="{element, index}">
+          <tr :style="{backgroundColor: element.colore}">
+        <td class="text-nowrap">
+            <button class="drag-me btn btn-sm btn-light me-2"><i class="fas fa-grip-vertical"></i></button>
+            <button class="btn btn-sm btn-danger me-2" @click="removeRiga(index)"><i class="far fa-trash-alt"></i></button>
+            <label> <span class="btn btn-sm btn-light"><i class="far fa-palette"></i></span>
+            <input type="color" v-model="element.colore" list="colori" class="mt-3">
+        </label>
+        </td>
+        <td style="min-width: 100px;"><input type="text" v-model="element.codice" @input="loadProdotti(element, element.codice)">
+            <ul class="search-results list-unstyled" v-if="element.results?.length">
+                <li v-for="result in element.results" @click="element.codice = result.codice; element.descrizione = result.descrizione; element.prezzo = result.prezzo; element.results = null">[[result.codice]] - [[result.descrizione]]</li>
+            </ul>
+        </td>
+        <td style="min-width: 300px;"><textarea v-model="element.descrizione" rows="2" @input="loadProdotti(element, element.descrizione); auto_grow($event.target)"></textarea></td>
+        <td>[[element.um]]</td>
+        <td class="text-end" style="min-width: 70px;"><input type="number" v-model="element.quantita" min="0"></td>
+        <td style="min-width: 100px;"><input class="text-end" type="number" v-model="element.prezzo"></td>
+        <td style="min-width: 70px;">
+            <input class="text-end mb-1" type="number" v-model="element.sconto1" step=".1" min="0" max="100">
+            <input class="text-end mb-1" type="number" v-model="element.sconto2" step=".1" min="0" max="100">
+            <input class="text-end mb-1" type="number" v-model="element.sconto3" step=".1" min="0" max="100">
+            <input class="text-end" type="number" v-model="element.sconto4" step=".1" min="0" max="100">
+        </td>
+        <td class="text-end">[[calcolaNettoRiga(element)]]</td>
+        <td class="text-end">[[roundPrice(calcolaNettoRiga(element) * element.quantita)]]</td>
+        <td><select v-model="element.aliquota_iva">
+            <option v-for="iva in aliquote_iva" :value="iva[0]">[[ iva[1] ]]</option>
+        </select>
+         </td>
+          </tr>
+        </template>
+    </draggable>
+
+    <tfoot>
+    <tr>
+        <td colspan="10">
+            <button class="btn btn-sm btn-primary me-3" @click="addRiga()"><i class="far fa-plus"></i></button>
+            <button class="btn btn-sm btn-primary" @click="addRiga(5)"><i class="far fa-plus"></i> 5</button>
+        </td>
+       
+    </tr>
+    <tr>
+        <td colspan="6">TOTALE</td>
+        <td colspan="2" class="text-end"><button @click="saveOfferta()" class="btn btn-sm btn-success"><i class="far fa-save"></i></button></td>
+        <td class="text-end h3" colspan="2">[[totale_offerta()]]</td>
+    </tr>
+    </tfoot>
+    
+</table>
+</div>
+
+
+<h2><button @click="ricalcolaIva()" class="btn btn-sm btn-warning"><i class="far fa-redo"></i> </button> Riepilogo IVA</h2>
+
+<table class="table table-sm bg-light w-50">
+    <tr>
+        <th>Aliquota</th>
+        <th class="text-end">Imponibile</th>
+        <th class="text-end">IVA</th>
+    </tr>
+    <tr v-for="iva in righeIva">
+        <td>[[iva.aliquota]]%</td>
+        <td class="text-end">[[roundPrice(iva.imponibile)]]</td>
+        <td class="text-end">[[roundPrice(iva.iva)]]</td>
+    <tr>
+        <th>Totale</th>
+        <th class="text-end">[[totale_offerta()]]</th>
+        <th class="text-end">[[totale_iva()]]</th>
+    </tr>
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+    <script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
+
+        const offerta = JSON.parse(document.getElementById('offerta-json').textContent)
+        const cliente = JSON.parse(document.getElementById('cliente-json').textContent)
+        const aliquote_iva = JSON.parse(document.getElementById('aliquote-iva').textContent)
+        offerta.pk = {{ offerta.pk }}
+
+
+        const app = Vue.createApp({
+            delimiters: ["[[", "]]"],
+
+            data() {
+                return {
+                    offerta: offerta,
+                    cliente: cliente,
+                    aliquote_iva: aliquote_iva,
+                    query: '',
+                    results: [],
+                    searching: false,
+                    righeIva: [],
+                }
+
+            },
+            mounted() {
+                if (this.offerta.righe.length === 0) {
+                    this.addRiga(5)
+                }
+                this.ricalcolaIva()
+            },
+            created() {
+            },
+            methods: {
+                nl2br(str) {
+                    return str.replace(/(?:\r\n|\r|\n)/g, '<br>')
+                },
+                totale_offerta() {
+                    let totale = 0
+                    this.offerta.righe.forEach(riga => {
+                        totale += this.calcolaNettoRiga(riga) * riga.quantita
+                    })
+                    return totale.toFixed(2)
+                },
+                totale_iva() {
+                    let totale = 0
+                    this.righeIva.forEach(iva => {
+                        totale += iva.iva
+                    })
+                    return totale.toFixed(2)
+                },
+                ricalcolaIva() {
+                    const righeIva = []
+                    this.offerta.righe.forEach(riga => {
+                        const iva = righeIva.find(item => item.aliquota === riga.aliquota_iva)
+                        if (iva) {
+                            iva.imponibile += this.calcolaNettoRiga(riga) * riga.quantita
+                            iva.iva += this.calcolaNettoRiga(riga) * riga.quantita * riga.aliquota_iva / 100
+                        } else {
+                            righeIva.push({
+                                aliquota: riga.aliquota_iva,
+                                imponibile: this.calcolaNettoRiga(riga) * riga.quantita,
+                                iva: parseInt(riga.aliquota_iva) ? this.calcolaNettoRiga(riga) * riga.quantita * riga.aliquota_iva / 100 : 0
+                            })
+                        }
+                    })
+                    this.righeIva = righeIva
+                },
+                addRiga(num=1) {
+                    for (let i = 0; i < num; i++) {
+                        this.offerta.righe.push({
+                            pk: null,
+                            sort_order: this.offerta.righe.length,
+                            codice: '',
+                            descrizione: '',
+                            um: '',
+                            quantita: 1,
+                            prezzo: 0,
+                            offerta: this.offerta.pk,
+                            sconto1: this.offerta.righe.length ? this.offerta.righe[0].sconto1 : 0,
+                            sconto2: this.offerta.righe.length ? this.offerta.righe[0].sconto2 : 0,
+                            sconto3: this.offerta.righe.length ? this.offerta.righe[0].sconto3 : 0,
+                            sconto4: this.offerta.righe.length ? this.offerta.righe[0].sconto4 : 0,
+                            prezzo_totale: 0,
+                            aliquota_iva: this.offerta.righe.length ? this.offerta.righe[0].aliquota_iva :22,
+                            results: [],
+                        })
+                    }
+                },
+                removeRiga(index) {
+      //              alert('Sei sicuro di voler eliminare questa riga?' + index)
+                    this.offerta.righe.splice(index, 1)
+                },
+                resetSortOrder() {
+                    this.offerta.righe.forEach((riga, index) => {
+                        riga.sort_order = index
+                    })
+                },
+        
+                reloadOfferta() {
+                    axios.get('{% url "gestione:offerta_edit" offerta.cliente.pk offerta.pk %}')
+                        .then(response => {
+                            this.offerta = response.data
+                            this.offerta.editing = false
+                     
+                        })
+                        .catch(error => {
+                            console.log(error)
+                        })
+                },
+                
+
+
+                saveOfferta() {
+                    // Altrimenti manda stringa vuota
+                    this.offerta.indirizzo = this.offerta.indirizzo || null
+                    fetch(`{% url 'gestione:offerta_edit' offerta.cliente.pk offerta.pk %}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify(this.offerta)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.offerta.editing = false
+                    })
+                },
+                 resizeTextareas() {
+                     document.querySelectorAll('textarea').forEach(el => {
+                         this.auto_grow(el)
+                     })
+                 },
+                roundPrice(price) {
+                    return (Math.round(price * 100) / 100).toFixed(2)
+                },
+                calcolaNettoRiga(riga) {
+                    // calcola il prezzo netto della riga considerando i 4 sconti
+                    const prezzo = riga.prezzo
+                    const sconto1 = riga.sconto1
+                    const sconto2 = riga.sconto2
+                    const sconto3 = riga.sconto3
+                    const sconto4 = riga.sconto4
+                    const netto = prezzo * (100 - sconto1) / 100 * (100 - sconto2) / 100 * (100 - sconto3) / 100 * (100 - sconto4) / 100
+                    return this.roundPrice(netto)
+                },
+
+                loadProdotti(riga, query) {
+                    if (query.length < 3) {
+                        riga.results = []
+                        return
+                    }
+                    this.searching = true
+                    fetch(`{% url 'home:cerca_prodotti' %}?q=${query}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            riga.results = data
+                            this.searching = false
+                        })
+                },
+                setGlobalSconto() {
+                    const sconti = document.querySelectorAll('input[id^="global-sconto-"]')
+                    this.offerta.righe.forEach(riga => {
+                        riga.sconto1 = sconti[0].value
+                        riga.sconto2 = sconti[1].value
+                        riga.sconto3 = sconti[2].value
+                        riga.sconto4 = sconti[3].value
+                    })
+                },
+                setGlobalIva() {
+                    const iva = document.getElementById('global-iva').value
+                    this.offerta.righe.forEach(riga => {
+                        riga.aliquota_iva = iva
+                    })
+                },
+                auto_grow(element) {
+                    element.style.height = "5px";
+                    element.style.height = (element.scrollHeight) + "px";
+                }
+            },
+        })
+        app.component('draggable', vuedraggable);
+        window.vueApp = app.mount('#app')
+
+        const offertaTable = document.getElementById('offertaTable')
+        const offertaRighi = document.getElementById('offertaRighi')
+        offertaTable.prepend(offertaRighi)
+
+        document.querySelectorAll('textarea').forEach(el => {
+            vueApp.auto_grow(el)
+        })
+        
+})
+         
+    </script>
+{% endblock %}

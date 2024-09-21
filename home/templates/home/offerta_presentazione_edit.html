@@ -1,0 +1,36 @@
+{% extends 'home/base.html' %}
+{% load wagtailcore_tags %}
+{% block content %}
+
+
+<h1>{{object.titolo}}</h1>
+<p>Offerta n. {{object.numero_documento}} Data: {{object.data|date:'j.n.Y'}}</p>
+
+<form method="post" class="card card-body bg-light mb-5"{% if object.presentazione %} onsubmit="return confirm('Il testo standard sostituirà l’attuale testo')"{% endif %}>
+{% csrf_token %}
+
+<label for="field-modello">Testo di presentazione standard</label>
+<select required name="modello" id="field-modello" class="form-control mb-3">
+<option value="">Seleziona un modello</option>
+{% for modello in modelli %}
+<option value="{{modello.pk}}">{{modello}}</option>
+{% endfor %}
+</select>
+
+<div>
+    <input type="submit" name="save" class="btn btn-success" value="Usa questo modello">
+</div>
+
+</form>
+
+
+
+<p><a href="/admin/snippets/home/offerta/edit/{{object.pk}}/#tab-presentazione" class="btn btn-primary"><i class="far fa-pen"></i></a></p>
+
+{% if object.presentazione %}
+<div class="presentazione">
+    {{object.presentazione|richtext}}
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+
+    <h1>Specifiche prodotti</h1>
+
+    <ul class="list-group">
+        {% for doc in documenti %}
+        <li class="list-group-item d-flex justify-content-between"><a href="{{ doc.document.url }}"><i class="fa-regular fa-file"></i> {{ doc.document.title }}</a>
+        
+            {% if not doc.document.uploaded_by_user %}
+        <form method="post" onsubmit="return confirm('Sei sicuro?')">
+        {% csrf_token %}
+        <button name="delete" title="Elimina" value="{{ doc.id }}" type="submit" class="btn btn-danger btn-sm"><i class="fa-regular fa-trash"></i> </button>
+        </form>
+        {% endif %}
+        
+        </li>
+        {% endfor %}
+        </ul>
+
+
+{% endblock %}

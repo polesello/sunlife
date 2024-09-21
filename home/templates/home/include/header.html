@@ -1,0 +1,40 @@
+{% load static %}
+<header>
+<div class="container">
+    <div class="row my-3">
+        <div class="col-6">
+            <img {% if cliente.gruppo.is_privato %}src="{% static 'home/img/logo-sunlife.png' %}" alt="Sunlife" {% else %} src="{% static 'home/img/logo-lazzari.png' %}" alt="Lazzari" {% endif %} class="logo">
+        </div>
+        <div class="col-6">
+            {% if cliente %}
+            {% if perms.home.change_cliente %}
+            <a class="btn btn-outline-secondary btn-sm float-end" href="/admin/snippets/home/cliente/edit/{{cliente.pk}}/"><i class="fa-regular fa-pen"></i> Modifica</a>
+            {% endif %}
+            <span class="badge rounded-pill bg-success"> <i class="fa-solid fa-user"></i> {{ cliente }}</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if request.session.client_id %}
+<div id="menu">
+    <div class="container">
+        {% url 'home:dati-cliente' as dati_url %}
+        {% url 'home:offerte' as offerte_url %}
+        {% url 'home:documenti_prodotti' as documenti_prodotti_url %}
+        {% url 'home:documenti-cliente' as documenti_cliente_url %}
+        <ul>
+            <li{% if dati_url == request.path %} class="active"{% endif %}><a href="{{dati_url}}">I miei dati</a></li>
+            <li{% if offerte_url == request.path %} class="active"{% endif %}><a href="{{offerte_url}}">Offerte</a></li>
+            {% if cliente.documenti_prodotto.exists %}
+            <li{% if documenti_prodotti_url == request.path %} class="active"{% endif %}><a href="{{documenti_prodotti_url}}">Specifiche prodotti</a></li>
+            {% endif %}
+            <li{% if documenti_cliente_url == request.path %} class="active"{% endif %}><a href="{{documenti_cliente_url}}">Scambio documenti</a></li>
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+
+</header>
+

@@ -1,0 +1,44 @@
+:root {
+    --red: #fc020a;
+}
+
+header .logo {
+    height: 50px;
+}
+
+/* a {
+    color: var(--red);
+} */
+
+#menu {
+    border-bottom: 1px solid #eee;
+    border-top: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+#menu ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#menu li {
+    display: inline-block;
+    margin: 0 10px;
+}
+
+#menu a {
+    text-decoration: none;
+    color: #333;
+    display: block;
+    padding: 10px;
+}
+
+#menu a:hover, #menu a:focus {
+    background-color: #eee;
+}
+
+#menu li.active a {
+    background-color: var(--red);
+    color: #fff;
+}

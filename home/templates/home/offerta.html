@@ -1,0 +1,404 @@
+{% load wagtailimages_tags %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
+
+<title>Offerta {% if object.numero_documento %}n. {{object.numero_documento}}{% endif %} del {{object.data|date:'d.m.Y'}}</title>
+
+<style>
+
+.row {
+    display: -webkit-box; /* wkhtmltopdf uses this one */
+    display: flex;
+    -webkit-box-pack: center; /* wkhtmltopdf uses this one */
+    justify-content: center;
+}
+
+
+
+.row > div {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    flex: 1;
+}
+
+.row > div:last-child {
+    margin-right: 0;
+}
+
+.product-image {
+    text-align: center;
+}
+.product-image img {
+    width: 300px;
+    object-fit: cover;
+    object-position: center;
+    padding: 5px;
+    border: 1px solid #ccc;
+    margin: 15px 0;
+}
+
+table.offerta {
+    width: 100%;
+    border-left: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+}
+table.offerta th {
+    background: #a6a6a6;
+    font-weight: bold;
+    color: #fff;
+    border-top: 3px solid #f00;
+    padding: 5px 10px;
+    text-align: center;
+    vertical-align: middle;
+    border-right: 1px solid #bbb;
+}
+table.offerta td {
+    border-right: 1px solid #ccc;
+    padding: 5px 10px;
+    line-height: 1.3;
+    min-width: 20px;
+}
+table.offerta tr:nth-child(even) td {
+    background: #f0f0f0;
+}
+table.offerta tr.special td {
+    background: #ff9;
+}
+table.offerta .number {
+    text-align: right;
+    white-space: nowrap;
+}
+
+#righi {
+    margin: 50px 0;
+}
+
+div.offerta {
+    border-top: 3px solid #f00;
+    margin-top: 10px;
+}
+
+div.offerta h2 {
+    font-size: 18px;
+    font-weight: bold;
+    background: #a6a6a6;
+    color: #fff;
+    padding: 5px 10px;
+}
+
+
+
+.totale {
+    font-size: 24px;
+    font-weight: bold;
+    overflow: hidden;
+    text-align: right;
+}
+
+.totale .label, .totale .value {
+    width: 46%;
+    padding: 10px 2%;
+    line-height: 1.3;
+}
+
+.totale .label {
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.totale .value {
+    text-align: right;
+    background: #fdd;
+}
+
+h1 {
+    margin: .5cm 0;
+    border-bottom: 3px solid #ccc;
+    text-align: center;
+    padding: 2mm;
+}
+
+
+.logo {
+    width: 220px;
+}
+
+.logo img {
+    max-width: 100%;
+}
+ 
+#firma {
+    width: 200px;
+    text-align: center;
+}
+
+#footer {
+    overflow: auto;
+}
+
+#signature {
+    margin-top: 1cm;
+}
+
+.legal {
+    font-size: 13px;
+    text-align: center;
+    color: #666;
+}
+
+{% if pdf %}
+body {
+    font-family: sans-serif;
+    font-size: 13px;
+}
+.col-lg-6 {
+    margin: 0 10px;
+}
+{% else %}
+@media (max-width: 800px) {
+    #righi thead {
+        display: none;
+    }
+    #righi td {
+        display: block;
+    }
+    #righi td[data-qta="1"], #righi td[data-col=codice], #righi td:empty {
+        display: none;
+    }
+    #righi td[data-col=descrizione]:before {
+        content: attr(data-codice) " -";
+    }
+    #righi td[data-col=lordo]:before {
+        content: "Prezzo unitario: ";
+    }
+    #righi td[data-col=netto]:before {
+        content: "Prezzo netto: ";
+    }
+    #righi td[data-col=totale] {
+        font-weight: bold;
+    }
+    #righi td[data-col=totale]:before {
+        content: "Totale: ";
+    }
+    #righi td[data-col=iva] {
+        text-align: right;
+    }
+    #righi td[data-col=iva]:before {
+        content: "% IVA: ";
+    }
+}
+{% endif %}
+
+</style>
+
+    </head>
+<body>
+    <div class="container">
+
+        {% comment %}
+<div>
+  <div class="logo">{% if cliente.gruppo.is_privato %}<img src="/media/{{info_utente.logo}}" alt="">
+    {% else %}<img src="/media/{{info_utente.logo_offerta_ditte}}" alt="">{% endif %}
+    </div>
+  <div class="intestazione">{% if cliente.gruppo.is_privato %}{{info_utente.intestazione_offerta_privati|safe}}{% else %}{{info_utente.intestazione_offerta|safe}}{% endif %}</div>
+  <div class="clear"></div>
+</div>
+
+{% endcomment %}
+
+
+<h1>{{object.titolo}}</h1>
+<p>Offerta n. {{object.numero_documento}} Data: {{object.data|date:'j.n.Y'}}</p>
+{% if object.validita %}<p>Validità offerta: <strong>{{object.validita}}</strong> giorn{{object.validita|pluralize:'o,i'}}</p>{% endif %}
+{% if object.termine_consegna %}<p>Termine non essenziale di consegna prodotti o servizi entro <strong>{{object.termine_consegna}}</strong> giorni dalla conclusione del contratto.</p>{% endif %}
+
+<div class="row">
+    <div class="col-lg-6">
+
+
+    {% with cliente=object.cliente %}
+<div class="offerta">
+<h2>Cliente</h2>
+<p>{{cliente.ragsoc}}
+{% if cliente.indirizzo %}<br>{{cliente.indirizzo}}{% endif %}
+<br>{{cliente.cap}} {{cliente.citta}} ({{cliente.provincia}})
+{% if cliente.stato != 'Italia' %}<br>{{cliente.stato}}{% endif %}</p>
+{% if cliente.telefono %}<p>Telefono: {{cliente.telefono}}</p>{% endif %}
+{% if cliente.email %}<p>Mail: {{cliente.email}}</p>{% endif %}
+{% if cliente.pec %}<p>PEC: {{cliente.pec}}</p>{% endif %}
+{% if cliente.piva %}<p>P. IVA {{cliente.piva}}</p>{% endif %}
+{% if cliente.cf %}<p>C. F. {{cliente.cf}}</p>{% endif %}
+{% if cliente.banca %}<p>Banca: {{cliente.banca}}</p>{% endif %}
+{% if cliente.iban %}<p>IBAN: {{cliente.iban}}</p>{% endif %}
+</div>
+    {% endwith %}
+
+    
+
+
+
+{% if object.esclusioni %}
+<div class="offerta">
+  <h2>Esclusioni</h2>
+  <div>{{object.esclusioni|linebreaks|default_if_none:''}}</div>
+</div>
+{% endif %}
+
+{% if object.note %}
+<div class="offerta">
+  <h2>Note</h2>
+  <div>{{object.note|linebreaks|default_if_none:''}}</div>
+</div>
+{% endif %}
+
+
+    </div>
+    <div class="col-lg-6">
+
+        {% if object.indirizzo %}
+        <div class="offerta">
+            <h2>Consegna/Destinazione</h2>
+            {{object.indirizzo.indirizzo}}
+            <br>{{object.indirizzo.cap}} {{object.indirizzo.citta}} ({{object.indirizzo.provincia}})
+            {% if object.indirizzo.stato != 'Italia' %}<br>{{object.indirizzo.stato}}{% endif %}</div>
+        {% endif %}
+
+{% if object.spedizione %}
+<div class="offerta">
+<h2>Modalità spedizione</h2>
+<div>
+    <p>{{object.spedizione}}</p>
+</div>
+</div>
+{% endif %}
+
+{% if object.pagamento or object.mostra_banca %}
+<div class="offerta">
+<h2>Pagamento</h2>
+{% if object.pagamento %}<p>{{object.pagamento|linebreaks}}</p>{% endif %}
+{% if object.banca %}
+    <p>Banca: {{object.banca.nome}}</p>
+    <p>IBAN: {{object.banca.iban}}</p>
+{% endif %}
+</div>
+{% endif %}
+
+{% if object.agevolazione %}
+<div class="offerta">
+    <h2>Agevolazioni fiscali</h2>
+    <p style="background: #ff9; margin: 0; padding: 5px;">{{object.agevolazione|linebreaksbr}}</p>
+</div>
+{% endif %}
+
+</div> 
+</div>
+
+
+{% if not pdf %}<div class="table-responsive">{% endif %}
+<table class="offerta" id="righi">
+<thead>
+<tr>
+    {% if not object.nascondi_codici %}
+        <th>Codice</th>
+    {% endif %}
+    <th>Descrizione</th>
+    <th>UM</th>
+    <th>Q.tà</th>
+    {% if not object.nascondi_prezzi and not object.nascondi_sconti %}
+        <th>Prezzo unitario</th>
+    {% endif %}
+    {% if object.riepilogo.max_sconti and not object.nascondi_sconti %}
+        <th colspan="{{object.riepilogo.max_sconti}}">Sconti %</th>
+    {% endif %}
+    {% if not object.nascondi_prezzi %}
+        <th>Prezzo netto</th>
+        <th>Totale</th>
+    {% endif %}
+    <th>IVA</th>
+</tr>
+</thead>
+{% for rigo in object.righe.all %}
+<tr{% if rigo.speciale %} class="special"{% endif %}{% if rigo.colore %} style="background-color: {{rigo.colore}}"{% endif %}>
+    {% if not object.nascondi_codici %}
+        <td data-col="codice">{{rigo.codice}}</td>
+    {% endif %}
+    <td data-col="descrizione" data-codice="{{rigo.codice}}">{% if rigo.immagine %}
+        <div class="product-image">{% image rigo.immagine width-300 %}</div>
+{% endif %}
+        
+        {{rigo.descrizione|linebreaksbr}}</td>
+    <td data-qta="{% if rigo.um == 'PZ' or rigo.um == 'Q.tà' %}{{rigo.quantita|floatformat:0}}{% else %}{{rigo.quantita}}{% endif %}">{{rigo.um}}</td>
+    <td data-col="qta" data-qta="{% if rigo.um == 'PZ' or rigo.um == 'Q.tà' %}{{rigo.quantita|floatformat:0}}{% else %}{{rigo.quantita}}{% endif %}">{% if rigo.um == 'PZ' or rigo.um == 'Q.tà' %}{{rigo.quantita|floatformat:0}}{% else %}{{rigo.quantita}}{% endif %}</td>
+    {% if not object.nascondi_prezzi and not object.nascondi_sconti %}
+        <td class="number" data-col="lordo">{{rigo.prezzo|floatformat:'2g'}} €</td>
+    {% endif %}
+    {% if not object.nascondi_sconti %}
+        {% if object.riepilogo.max_sconti %}<td>{{rigo.sconto1|default_if_none:''}}</td>{% endif %}
+        {% if object.riepilogo.max_sconti > 1 %}<td>{{rigo.sconto2|default_if_none:''}}</td>{% endif %}
+        {% if object.riepilogo.max_sconti > 2 %}<td>{{rigo.sconto3|default_if_none:''}}</td>{% endif %}
+        {% if object.riepilogo.max_sconti > 3 %}<td>{{rigo.sconto4|default_if_none:''}}</td>{% endif %}
+    {% endif %}
+    {% if not object.nascondi_prezzi %}
+        <td class="number" data-col="netto">{{rigo.prezzo_netto|floatformat:'2g'}} €</td>
+        <td class="number" data-col="totale">{{rigo.prezzo_totale|floatformat:'2g'}} €</td>
+    {% endif %}
+    <td data-col="iva">{{rigo.aliquota_iva|default:''}}</td>
+</tr>
+{% endfor %}
+</table>
+{% if not pdf %}</div>{% endif %}
+
+<div id="footer">
+
+    <div class="row">
+        <div class="col-lg-6">
+            <table class="offerta">
+                <tr>
+                    <th>Aliquota</th>
+                    <th>Imponibile</th>
+                    <th>IVA</th>
+                </tr>
+                {% for rigo in object.riepilogo.riepilogo_iva %}
+                <tr>
+                    <td class="number">{{rigo.aliquota|default:'Esente'}}</td>
+                    <td class="number">{{rigo.imponibile|floatformat:'2g'}} €</td>
+                    <td class="number">{{rigo.iva|floatformat:'2g'}} €</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <th>Totale</th>
+                    <th class="number">{{object.riepilogo.totale_imponibile|floatformat:'2g'}} €</th>
+                    <th class="number">{{object.riepilogo.totale_iva|floatformat:'2g'}} €</th>
+                </tr>
+            </table>
+        </div>
+        <div class="col-lg-6">
+            <p class="totale"><span class="label">Totale offerta:
+                {% if object.cessione_credito_perc %}<br><span style="text-transform: none; font-weight: normal;">IVA compresa</span>{% endif %}</span> <span class="value">
+                    {% if object.cessione_credito_perc == 65 %}{{object.riepilogo.totale_offerta}}
+                    {% elif object.cessione_credito_perc == 50 %}{{object.riepilogo.totale_offerta}}
+                    {% elif not object.cessione_credito_perc %}{{object.riepilogo.totale_offerta|floatformat:'2g'}}
+                    {% endif %}
+                €</span></p>
+            {% if object.cessione_credito_perc %}
+                <p style="margin-top: 10px; font-size: 12px; text-align: right;">al netto della cessione del credito del {{object.get_cessione_credito_perc_display}} a Sunlife Group</p>
+                {% if object.mostra_totale %}<p style="margin-top: 10px; font-size: 13px; text-align: right;">(Totale lordo: <strong>{{object.riepilogo.totale_offerta|floatformat:'2g'}}&nbsp;€</strong>)</p>{% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="legal mt-4">
+    <p class="mb-1">Salvo quanto espressamente derogato da questa offerta, trovano applicazione le allegate condizioni generali di vendita di prodotti e servizi.</p>
+    <p>È vietata la riproduzione di questo documento anche se parziale e il suo uso non autorizzato. Tutti i diritti sono riservati.</p>
+</div>
+
+</div>
+
+    </div>
+</body>
+</html>

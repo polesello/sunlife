@@ -1,0 +1,30 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-6 offset-lg-3">
+
+<h1>Area riservata Sunlife</h1>
+<p>Se sei cliente Sunlife, inserisci la tua mail e riceverai un link personalizzato per accedere alle offerte e ai tuoi dati.</p>
+
+<div class="card card-body bg-light">
+<form method="post">
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input autofocus required class="form-control" type="email" name="email" id="email">
+    </div>
+
+    <input type="submit" class="mt-4 btn btn-success" name="send" value="Richiedi l’accesso">
+
+
+</form>
+</div>
+
+    </div>
+</div>
+
+
+{% endblock %}
