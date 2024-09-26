@@ -129,3 +129,5 @@ production-configs.json
 
 # Node
 node_modules
+
+/static
