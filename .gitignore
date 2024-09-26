@@ -131,3 +131,4 @@ production-configs.json
 node_modules
 
 /static
+*.json
