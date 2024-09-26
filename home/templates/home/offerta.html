@@ -83,11 +83,12 @@ div.offerta {
 }
 
 div.offerta h2 {
-    font-size: 18px;
+    font-size: 13px;
     font-weight: bold;
     background: #a6a6a6;
     color: #fff;
-    padding: 5px 10px;
+    padding: 5px 10px 3px;
+    text-transform: uppercase;
 }
 
 
@@ -290,7 +291,7 @@ body {
 {% if object.agevolazione %}
 <div class="offerta">
     <h2>Agevolazioni fiscali</h2>
-    <p style="background: #ff9; margin: 0; padding: 5px;">{{object.agevolazione|linebreaksbr}}</p>
+    <p style="background: #dbffcb; margin: 0; padding: 5px;">{{object.agevolazione|linebreaksbr}}</p>
 </div>
 {% endif %}
 
@@ -377,7 +378,7 @@ body {
             </table>
         </div>
         <div class="col-lg-6">
-            <p class="totale"><span class="label">Totale offerta:
+            <p class="totale"><span class="label" style="white-space: nowrap;">Totale offerta:
                 {% if object.cessione_credito_perc %}<br><span style="text-transform: none; font-weight: normal;">IVA compresa</span>{% endif %}</span> <span class="value">
                     {% if object.cessione_credito_perc == 65 %}{{object.riepilogo.totale_offerta}}
                     {% elif object.cessione_credito_perc == 50 %}{{object.riepilogo.totale_offerta}}

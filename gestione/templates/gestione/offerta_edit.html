@@ -131,6 +131,7 @@
     <p v-if="offerta.termine_consegna">Termine consegna: <strong>[[offerta.termine_consegna]] giorni</strong></p>
     <p v-if="offerta.spedizione">Modalità spedizione: <strong>[[offerta.spedizione]]</strong></p>
     <p v-if="offerta.esclusioni">Esclusioni: <strong>[[offerta.esclusioni]]</strong></p>
+    <p v-if="offerta.agevolazione">Agevolazioni fiscali: <strong>[[offerta.agevolazione]]</strong></p>
     <p v-if="offerta.note">Note: <strong v-html="nl2br(offerta.note)"></strong></p>
     <p v-if="offerta.note_admin">Note private: <strong>[[offerta.note_admin]]</strong></p>
     <p>Visibile al cliente? <strong>[[offerta.visibile ? 'Sì' : 'No']]</strong></p>
@@ -287,10 +288,10 @@
     <thead>
         <tr>
             <th colspan="7" class=" bg-light text-end">Sconti:
-                <input style="width: 50px;" id="global-sconto-1" class="text-end me-2 border bg-white" type="number" step=".1" min="0" max="100">
-                <input style="width: 50px;" id="global-sconto-2" class="text-end me-2 border bg-white" type="number" step=".1" min="0" max="100">
-                <input style="width: 50px;" id="global-sconto-3" class="text-end me-2 border bg-white" type="number" step=".1" min="0" max="100">
-                <input style="width: 50px;" id="global-sconto-4" class="text-end me-2 border bg-white" type="number" step=".1" min="0" max="100">
+                <input style="width: 50px;" id="global-sconto-1" class="text-end me-2 border bg-white" type="number" step="1" min="0" max="100">
+                <input style="width: 50px;" id="global-sconto-2" class="text-end me-2 border bg-white" type="number" step="1" min="0" max="100">
+                <input style="width: 50px;" id="global-sconto-3" class="text-end me-2 border bg-white" type="number" step="1" min="0" max="100">
+                <input style="width: 50px;" id="global-sconto-4" class="text-end me-2 border bg-white" type="number" step="1" min="0" max="100">
                 <button type="button" @click="setGlobalSconto()" class="btn btn-sm btn-dark"><i class="far fa-arrow-down"></i></button>
             </th>
             <th colspan="3" class="text-end bg-light">IVA
@@ -343,10 +344,10 @@
         <td class="text-end" style="min-width: 70px;"><input type="number" v-model="element.quantita" min="0"></td>
         <td style="min-width: 100px;"><input class="text-end" type="number" v-model="element.prezzo"></td>
         <td style="min-width: 70px;">
-            <input class="text-end mb-1" type="number" v-model="element.sconto1" step=".1" min="0" max="100">
-            <input class="text-end mb-1" type="number" v-model="element.sconto2" step=".1" min="0" max="100">
-            <input class="text-end mb-1" type="number" v-model="element.sconto3" step=".1" min="0" max="100">
-            <input class="text-end" type="number" v-model="element.sconto4" step=".1" min="0" max="100">
+            <input class="text-end mb-1" type="number" v-model="element.sconto1" step="1" min="0" max="100">
+            <input class="text-end mb-1" type="number" v-model="element.sconto2" step="1" min="0" max="100">
+            <input class="text-end mb-1" type="number" v-model="element.sconto3" step="1" min="0" max="100">
+            <input class="text-end" type="number" v-model="element.sconto4" step="1" min="0" max="100">
         </td>
         <td class="text-end">[[calcolaNettoRiga(element)]]</td>
         <td class="text-end">[[roundPrice(calcolaNettoRiga(element) * element.quantita)]]</td>
