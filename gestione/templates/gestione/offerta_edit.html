@@ -247,12 +247,19 @@
             </div>
             <div class="col-lg-4 mb-3">
                 <div class="form-floating">
+                    <textarea class="form-control" id="c-agevolazione" placeholder="Agevolazioni fiscali" v-model="offerta.agevolazione" style="height: 100px;"></textarea>
+                    <label for="c-agevolazione">Agevolazioni fiscali</label>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-lg-4 mb-3">
+                <div class="form-floating">
                     <textarea class="form-control" id="c-note_admin" placeholder="Note private" v-model="offerta.note_admin" style="height: 100px;"></textarea>
                     <label for="c-note_admin">Note private</label>
                 </div>
             </div>
-        </div>
-        <div class="row">
             <div class="col-lg-4 mb-3">
                 <div class="form-block">
                     <input type="checkbox" id="c-visibile" placeholder="Visibile" v-model="offerta.visibile">

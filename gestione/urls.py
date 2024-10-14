@@ -8,6 +8,7 @@ urlpatterns = [
     path('clienti/', views.clienti, name='clienti'),
     path('clienti/<int:id>/', views.cliente_view, name='cliente_view'),
     path('clienti/<int:id>/edit/', views.cliente_edit, name='cliente_edit'),
+    path('clienti/<int:id>/delete/', views.cliente_delete, name='cliente_delete'),
 
     path('clienti/<int:id>/offerte/add/', views.offerta_edit, name='offerta_add'),
     path('clienti/<int:id>/offerte/<int:offerta_id>/', views.offerta_edit, name='offerta_edit'),
@@ -19,4 +20,7 @@ urlpatterns = [
     path('clienti/<int:id>/offerta_paste/', views.offerta_paste, name='offerta_paste'),
     path('clienti/<int:id>/offerta_cancel_copy/', views.offerta_cancel_copy, name='offerta_cancel_copy'),
 
+    path('clienti/<int:id>/doc/<int:doc_id>/', views.doc_edit, name='doc_edit'),
+   # path('clienti/<int:id>/doc/<int:doc_id>/delete/', views.doc_delete, name='doc_delete'),
+ 
 ]

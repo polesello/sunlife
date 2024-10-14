@@ -59,8 +59,13 @@ def offerta_view(request, pk, pdf=False, check_session=True):
                 for page in PdfReader(io.BytesIO(pdf_presentazione)).pages:
                     out.add_page(page)
 
-            html = render_to_string('home/offerta.html', {'object': offerta, 'pdf': pdf})
+            html = render_to_string('home/offerta.html', {'object': offerta, 'pdf': pdf, 'info_utente': load_info_utente(), 'request': request})
+            if 'html' in request.GET:
+                return HttpResponse(html)
+            
             pdf = pdfkit.from_string(html, False, options=PDF_OPTIONS)
+
+
 
             response = HttpResponse(content_type='application/pdf')
             if out:
@@ -414,3 +419,20 @@ def add_listino_2(request, id):
 
 
  
+def load_info_utente():
+    from .models import InformazioneUtente
+    info_utente = {}
+    records = InformazioneUtente.objects.all()
+
+    for r in records:
+        if r.tipo == 'C':
+            value = r.valore_char
+        if r.tipo == 'T':
+            value = r.valore_text
+        if r.tipo == 'I':
+            value = r.valore_image
+        if r.tipo == 'B':
+            value = r.valore_boolean
+        info_utente[r.codice] = value
+        
+    return info_utente

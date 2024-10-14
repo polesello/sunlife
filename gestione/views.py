@@ -110,6 +110,18 @@ def cliente_edit(request, id):
     return HttpResponse(status=405)
 
 
+def cliente_delete(request, id):
+    cliente = Cliente.objects.get(pk=id)
+    ragsoc = request.POST.get('ragsoc', '')
+    if ragsoc.lower() != cliente.ragsoc.lower():
+        messages.error(request, 'Il nome cliente non corrisponde')
+        return redirect(reverse('gestione:cliente_view', args=[id]))
+    
+    cliente.delete()
+    messages.success(request, 'Cliente eliminato')
+    return redirect(reverse('gestione:clienti'))
+
+
 def offerta_edit(request, id, offerta_id=None):
     cliente = Cliente.objects.get(pk=id)
 
@@ -221,3 +233,23 @@ def offerta_cancel_copy(request, id):
     request.session.pop('offerta_id_copied', None)
     messages.success(request, "Copia annullata.")
     return redirect(reverse('gestione:cliente_view', args=[id]))
+
+
+@csrf_exempt
+def doc_edit(request, id, doc_id):
+    cliente = Cliente.objects.get(pk=id)
+    doc = cliente.documenti.get(pk=doc_id)
+    if request.method == 'POST':
+        #salva il documentoCliente da json
+
+        data = json.loads(request.body)
+        doc.installatore = data.get('installatore')
+        doc.privato = data.get('privato')
+        doc.nome = data.get('nome')
+        doc.save()
+        return JsonResponse({'success': True, 'doc': doc_id})
+    elif request.method == 'DELETE':
+        doc.delete()
+        return JsonResponse({'success': True, 'doc': doc_id})
+    return JsonResponse({'nome': doc.nome})
+

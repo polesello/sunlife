@@ -358,6 +358,34 @@ class Cliente(index.Indexed, ClusterableModel):
 
 
 
+
+
+class DatiAbitazione(models.Model):
+    """Dati dell'abitazione del cliente"""
+    cliente = ParentalKey(Cliente, related_name='dati_abitazione')
+    totale_interni = models.IntegerField(blank=True, null=True, verbose_name="N° totali interni")
+    anno_costruzione = models.IntegerField(blank=True, null=True, verbose_name="Anno costruzione")
+    climatizzatore = models.BooleanField("Climatizzatore", default=False, null=True)
+    n_foglio = models.CharField("N° foglio", max_length=10, blank=True)
+    n_mappale = models.CharField("N° mappale", max_length=10, blank=True)
+    n_subalterno = models.CharField("N° subalterno", max_length=10, blank=True)
+    mq_riscaldati = models.IntegerField("M² riscaldati", blank=True, null=True)
+    potenza_caldaia = models.IntegerField("Potenza nominale vecchia caldaia", blank=True, null=True)
+    rendimento_caldaia = models.IntegerField("Rendimento vecchia caldaia", blank=True, null=True)
+    
+    def __str__(self):
+        return "%s" % self.cliente
+
+    class Meta:
+        verbose_name = "Dati abitazione"
+        verbose_name_plural = "Dati abitazione"
+
+
+
+
+
+
+
 class OffertaCliente(Orderable, models.Model):
   cliente = ParentalKey(Cliente, related_name='offerte_cliente')
   offerta = models.ForeignKey('home.Offerta', related_name='+', on_delete=models.CASCADE)
@@ -374,7 +402,39 @@ class DocumentoCliente(models.Model):
     file = models.FileField(upload_to='documenti')
     data_aggiornamento = models.DateTimeField(auto_now=True)
     privato = models.BooleanField(default=False, help_text="Non visibile all'utente nella sua area privata")
+    preview = models.ImageField(upload_to='previews', blank=True, null=True)
+    installatore = models.BooleanField(default=False, help_text="Documento per installatori")
 
+    def create_preview(self):
+        from PIL import Image
+        import os
+        from io import BytesIO
+        from django.core.files.uploadedfile import InMemoryUploadedFile
+
+        if self.file:
+            # if it's an image, create a thumbnail
+            if self.is_image():
+                img = Image.open(self.file)
+                img = img.convert('RGB')
+                img.thumbnail((200, 200))
+                thumb_io = BytesIO()
+                img.save(thumb_io, format='JPEG')
+                thumb_file = InMemoryUploadedFile(thumb_io, None, self.file.name, 'image/jpeg', thumb_io.tell(), None)
+                self.preview.save(self.file.name, thumb_file, save=True)
+            # if it's a pdf, create a preview
+            elif self.content_type == 'application/pdf':
+                from wand.image import Image as WImage
+                img = WImage(filename=self.file.path + '[0]')
+                img.format = 'jpeg'
+                # create temporary file
+                tmp = BytesIO()
+                img.save(file=tmp)
+                self.preview.save(self.file.name + '.jpg', tmp, save=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.preview:
+            self.create_preview()
 
     @property
     def content_type(self):

@@ -4,17 +4,30 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
 
 <title>Offerta {% if object.numero_documento %}n. {{object.numero_documento}}{% endif %} del {{object.data|date:'d.m.Y'}}</title>
 
 <style>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 
 .row {
     display: -webkit-box; /* wkhtmltopdf uses this one */
     display: flex;
     -webkit-box-pack: center; /* wkhtmltopdf uses this one */
     justify-content: center;
+}
+
+.col-lg-6:first-child {
+    padding-right: 1cm;
+}
+.col-lg-6:last-child {
+    padding-left: 1cm;
 }
 
 
@@ -45,6 +58,7 @@ table.offerta {
     width: 100%;
     border-left: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
+    font-size: 14px;
 }
 table.offerta th {
     background: #a6a6a6;
@@ -88,7 +102,18 @@ div.offerta h2 {
     background: #a6a6a6;
     color: #fff;
     padding: 5px 10px 3px;
-    text-transform: uppercase;
+}
+div.offerta section {
+    padding: 5px 10px;
+    font-size: 13px;
+}
+
+div.offerta section.fiscale {
+    background-color: #dbffcb;
+}
+
+div.offerta section p:last-child {
+    margin: 0;
 }
 
 
@@ -109,18 +134,28 @@ div.offerta h2 {
 .totale .label {
     text-align: center;
     text-transform: uppercase;
+    font-size: 16px;
 }
 
 .totale .value {
     text-align: right;
     background: #fdd;
+    display: inline-block;
+}
+
+header {
+    margin: 1cm auto;
+    text-align: center;
+    border: 3px solid #ccc;
+    padding: 10px;
+    background: #f0f0f0;
+    width: 60%;
+    border-radius: 10px;
 }
 
 h1 {
-    margin: .5cm 0;
-    border-bottom: 3px solid #ccc;
-    text-align: center;
-    padding: 2mm;
+    margin-bottom: 2mm;
+    font-size: 20px;
 }
 
 
@@ -131,9 +166,13 @@ h1 {
 .logo img {
     max-width: 100%;
 }
+
+.intestazione {
+    font-size: 13px;
+    line-height: 1.3;
+}
  
 #firma {
-    width: 200px;
     text-align: center;
 }
 
@@ -149,73 +188,50 @@ h1 {
     font-size: 13px;
     text-align: center;
     color: #666;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
 }
 
-{% if pdf %}
+p {
+    margin: .3em 0;
+}
+
+htnl {
+    height: 100%;
+}
+
 body {
     font-family: sans-serif;
-    font-size: 13px;
+    position: relative;
+    min-height: 33cm;
 }
-.col-lg-6 {
-    margin: 0 10px;
+
+table {
+    border-collapse: collapse;
 }
-{% else %}
-@media (max-width: 800px) {
-    #righi thead {
-        display: none;
-    }
-    #righi td {
-        display: block;
-    }
-    #righi td[data-qta="1"], #righi td[data-col=codice], #righi td:empty {
-        display: none;
-    }
-    #righi td[data-col=descrizione]:before {
-        content: attr(data-codice) " -";
-    }
-    #righi td[data-col=lordo]:before {
-        content: "Prezzo unitario: ";
-    }
-    #righi td[data-col=netto]:before {
-        content: "Prezzo netto: ";
-    }
-    #righi td[data-col=totale] {
-        font-weight: bold;
-    }
-    #righi td[data-col=totale]:before {
-        content: "Totale: ";
-    }
-    #righi td[data-col=iva] {
-        text-align: right;
-    }
-    #righi td[data-col=iva]:before {
-        content: "% IVA: ";
-    }
-}
-{% endif %}
+
 
 </style>
 
     </head>
 <body>
-    <div class="container">
 
-        {% comment %}
-<div>
-  <div class="logo">{% if cliente.gruppo.is_privato %}<img src="/media/{{info_utente.logo}}" alt="">
-    {% else %}<img src="/media/{{info_utente.logo_offerta_ditte}}" alt="">{% endif %}
-    </div>
-  <div class="intestazione">{% if cliente.gruppo.is_privato %}{{info_utente.intestazione_offerta_privati|safe}}{% else %}{{info_utente.intestazione_offerta|safe}}{% endif %}</div>
-  <div class="clear"></div>
-</div>
+<table width="100%">
+    <tr>
+  <td class="logo" width="60%">{% if cliente.gruppo.is_privato %}<img src="{{ request.scheme }}://{{ request.get_host }}/media/{{info_utente.logo}}" alt="">
+    {% else %}<img src="{{ request.scheme }}://{{ request.get_host }}/media/{{ info_utente.logo_offerta_ditte}}" alt="">{% endif %}
+  </td>
+  <td width="40%" class="intestazione">{% if cliente.gruppo.is_privato %}{{info_utente.intestazione_offerta_privati|safe}}{% else %}{{info_utente.intestazione_offerta|safe}}{% endif %}</td>
+</tr>
+</table>
 
-{% endcomment %}
+<header>
+    <h1>{{object.titolo}}</h1>
+    <p style="font-size: 15px; margin-bottom: 0;">Offerta n. <strong>{{object.numero_documento}}</strong> del <strong>{{object.data|date:'j.n.Y'}}</strong>
+    {% if object.validita %} – Validità: <strong>{{object.validita}}</strong> giorn{{object.validita|pluralize:'o,i'}}{% endif %}</p>
+</header>
 
-
-<h1>{{object.titolo}}</h1>
-<p>Offerta n. {{object.numero_documento}} Data: {{object.data|date:'j.n.Y'}}</p>
-{% if object.validita %}<p>Validità offerta: <strong>{{object.validita}}</strong> giorn{{object.validita|pluralize:'o,i'}}</p>{% endif %}
-{% if object.termine_consegna %}<p>Termine non essenziale di consegna prodotti o servizi entro <strong>{{object.termine_consegna}}</strong> giorni dalla conclusione del contratto.</p>{% endif %}
 
 <div class="row">
     <div class="col-lg-6">
@@ -224,7 +240,8 @@ body {
     {% with cliente=object.cliente %}
 <div class="offerta">
 <h2>Cliente</h2>
-<p>{{cliente.ragsoc}}
+<section>
+<p><strong>{{cliente.ragsoc}}</strong>
 {% if cliente.indirizzo %}<br>{{cliente.indirizzo}}{% endif %}
 <br>{{cliente.cap}} {{cliente.citta}} ({{cliente.provincia}})
 {% if cliente.stato != 'Italia' %}<br>{{cliente.stato}}{% endif %}</p>
@@ -235,6 +252,7 @@ body {
 {% if cliente.cf %}<p>C. F. {{cliente.cf}}</p>{% endif %}
 {% if cliente.banca %}<p>Banca: {{cliente.banca}}</p>{% endif %}
 {% if cliente.iban %}<p>IBAN: {{cliente.iban}}</p>{% endif %}
+</section>
 </div>
     {% endwith %}
 
@@ -245,14 +263,18 @@ body {
 {% if object.esclusioni %}
 <div class="offerta">
   <h2>Esclusioni</h2>
+  <section>
   <div>{{object.esclusioni|linebreaks|default_if_none:''}}</div>
+</section>
 </div>
 {% endif %}
 
 {% if object.note %}
 <div class="offerta">
   <h2>Note</h2>
+<section>
   <div>{{object.note|linebreaks|default_if_none:''}}</div>
+</section>
 </div>
 {% endif %}
 
@@ -271,27 +293,29 @@ body {
 {% if object.spedizione %}
 <div class="offerta">
 <h2>Modalità spedizione</h2>
-<div>
-    <p>{{object.spedizione}}</p>
-</div>
+<section>    <p>{{object.spedizione}}</p></section>
 </div>
 {% endif %}
 
 {% if object.pagamento or object.mostra_banca %}
 <div class="offerta">
 <h2>Pagamento</h2>
+<section>
 {% if object.pagamento %}<p>{{object.pagamento|linebreaks}}</p>{% endif %}
 {% if object.banca %}
     <p>Banca: {{object.banca.nome}}</p>
     <p>IBAN: {{object.banca.iban}}</p>
 {% endif %}
+</section>
 </div>
 {% endif %}
 
 {% if object.agevolazione %}
 <div class="offerta">
     <h2>Agevolazioni fiscali</h2>
-    <p style="background: #dbffcb; margin: 0; padding: 5px;">{{object.agevolazione|linebreaksbr}}</p>
+<section class="fiscale">
+    <p>{{object.agevolazione|linebreaksbr}}</p>
+</section>
 </div>
 {% endif %}
 
@@ -299,7 +323,6 @@ body {
 </div>
 
 
-{% if not pdf %}<div class="table-responsive">{% endif %}
 <table class="offerta" id="righi">
 <thead>
 <tr>
@@ -351,7 +374,6 @@ body {
 </tr>
 {% endfor %}
 </table>
-{% if not pdf %}</div>{% endif %}
 
 <div id="footer">
 
@@ -389,17 +411,21 @@ body {
                 <p style="margin-top: 10px; font-size: 12px; text-align: right;">al netto della cessione del credito del {{object.get_cessione_credito_perc_display}} a Sunlife Group</p>
                 {% if object.mostra_totale %}<p style="margin-top: 10px; font-size: 13px; text-align: right;">(Totale lordo: <strong>{{object.riepilogo.totale_offerta|floatformat:'2g'}}&nbsp;€</strong>)</p>{% endif %}
             {% endif %}
+
+            <div id="signature">
+                <div id="firma">
+                    {% if offerta.cliente.gruppo.is_privato %}{{info_utente.firma_privati|safe}}
+                {% else %}{{info_utente.firma_ditte|safe}}{% endif %}</div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="legal mt-4">
-    <p class="mb-1">Salvo quanto espressamente derogato da questa offerta, trovano applicazione le allegate condizioni generali di vendita di prodotti e servizi.</p>
+<div class="legal">
+    <p>Salvo quanto espressamente derogato da questa offerta, trovano applicazione le allegate condizioni generali di vendita di prodotti e servizi.</p>
+    {% if object.termine_consegna %}<p>Termine non essenziale di consegna prodotti o servizi entro <strong>{{object.termine_consegna}}</strong> giorni dalla conclusione del contratto.</p>{% endif %}
     <p>È vietata la riproduzione di questo documento anche se parziale e il suo uso non autorizzato. Tutti i diritti sono riservati.</p>
 </div>
 
-</div>
-
-    </div>
 </body>
 </html>

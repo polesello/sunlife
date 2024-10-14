@@ -32,9 +32,13 @@ class AgenteViewSet(SnippetViewSet):
 class TipoRichiestaViewSet(SnippetViewSet):
     model = TipoRichiesta
 
+class InformazioneUtenteViewSet(SnippetViewSet):
+    model = InformazioneUtente
+    list_display = ('nome', 'codice', 'get_tipo_display')
+
 class ImpostazioneGeneraleViewSetGroup(SnippetViewSetGroup):
     menu_label = 'Impostazioni generali'
-    items = (GruppoViewSet, BancaViewSet, AgenteViewSet, SegnalazioneViewSet, TipoRichiestaViewSet)
+    items = (GruppoViewSet, BancaViewSet, AgenteViewSet, SegnalazioneViewSet, TipoRichiestaViewSet, InformazioneUtenteViewSet)
 register_snippet(ImpostazioneGeneraleViewSetGroup)
  
 
@@ -100,8 +104,12 @@ class ClienteViewSet(SnippetViewSet):
 register_snippet(Cliente, viewset=ClienteViewSet)
 
 
-#print(ClienteViewSet.list_display_links, '++++++++++++++')
-
+class DatiAbitazioneViewSet(SnippetViewSet):
+    model = DatiAbitazione
+    list_display = ['cliente', 'anno_costruzione', 'mq_riscaldati', 'potenza_caldaia']
+    raw_id_fields = ('cliente',)
+    ordering = ('cliente',)
+register_snippet(DatiAbitazione, viewset=DatiAbitazioneViewSet)
 
 class ListinoViewSet(SnippetViewSet):
     model = Listino
