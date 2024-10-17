@@ -16,7 +16,7 @@
     </div>
 </div>
 
-{% if request.session.client_id %}
+{% if request.session.client_id and not installatore %}
 <div id="menu">
     <div class="container">
         {% url 'home:dati-cliente' as dati_url %}

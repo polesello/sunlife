@@ -857,6 +857,14 @@ class Offerta(index.Indexed, Orderable, PreviewableMixin, RevisionMixin, Cluster
 
     base_form_class = OffertaAdminForm
 
+
+    @property
+    def token(self):
+        from hashlib import sha1
+
+        SECRET = 'Metti su il cesso!'
+        return sha1((str(self.pk) + SECRET).encode('utf-8')).hexdigest()
+
     def get_preview_template(self, request, mode_name):
         return "home/offerta.html"
       

@@ -20,4 +20,7 @@ urlpatterns = [
     path('prodotti/search/', views.prodotti_search, name='cerca_prodotti'),
     path('comuni/search/', views.comuni_search, name='cerca_comuni'),
 
+
+    path('installatore/<int:pk>/<slug:token>/', views.installatore_start, name='installatore_start'),
+
 ]

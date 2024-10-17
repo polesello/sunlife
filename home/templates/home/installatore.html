@@ -1,0 +1,60 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+
+{%  with cliente=offerta.cliente %}
+<div class="row">
+    <div class="col-lg-6 offset-lg-3">
+        <div class="card">
+            <div class="card-header">
+                <strong>{{cliente.ragsoc}}</strong>
+            </div>
+            <div class="card-body">
+                <p>
+                    {% if cliente.indirizzo %}{{cliente.indirizzo}}{% endif %}
+                    <br>{{cliente.cap}} {{cliente.citta}} ({{cliente.provincia}})
+                    {% if cliente.stato != 'Italia' %}<br>{{cliente.stato}}{% endif %}
+                </p>
+            
+                    {% if cliente.telefono %}<p class="mb-1">Telefono: {{cliente.telefono}}</p>{% endif %}
+                    {% if cliente.email %}<p class="mb-1">Mail: {{cliente.email}}</p>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endwith %}
+
+<h1 class="text-center my-3 fs-4 mt-5 border-top border-bottom">{{ offerta.titolo }}</h1>
+
+<table class="table my-3">
+    {% for rigo in offerta.righe.all %}
+    
+    <tr{% if rigo.codice|slice:':3' != 'SLG' %} class="small"{%  else %} class="table-success"{%  endif %}>
+        <td>{{ rigo.codice }}</td>
+        <td>{{ rigo.descrizione|linebreaksbr }}</td>
+        <td class="text-nowrap text-end fw-bold">{% if rigo.um not in 'Q.tàPZ' or rigo.quantita != 1 %}
+            {{ rigo.quantita|floatformat:0 }} {% if rigo.um != 'Q.tà' %}{{ rigo.um }}{%  endif %}
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if documenti %}
+<h2 class="text-center my-3 fs-4 mt-5 border-top border-bottom">Documenti</h2>
+
+<div class="row">
+    {% for doc in documenti %}
+    <div class="col-sm-6 col-md-3 col-lg-2">
+        <a href="{{ doc.file.url }}" target="_blank" class="btn btn-outline-secondary btn-sm d-block mb-3">
+            <i class="fa-regular fa-file-pdf"></i> {{ doc.nome }}
+            {%  if doc.preview %}
+            <img src="{{ doc.preview.url }}" class="img-fluid">
+            {%  endif %}
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

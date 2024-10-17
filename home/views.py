@@ -436,3 +436,19 @@ def load_info_utente():
         info_utente[r.codice] = value
         
     return info_utente
+
+
+
+# Link da mandare l'installatore che mostra tutti i dati di un'offerta
+def installatore_start(request, pk, token):
+    from .models import Offerta
+    offerta = Offerta.objects.get(pk=pk)
+    if token == offerta.token:
+        documenti = offerta.cliente.documenti.filter(installatore=True)
+        context = {
+            'offerta': offerta,
+            'documenti': documenti,
+            'installatore': True
+        }
+        return render(request, 'home/installatore.html', context)
+    return redirect('/')

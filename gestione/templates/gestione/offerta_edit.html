@@ -124,7 +124,10 @@
         <a @click="offerta.editing=true" class="btn btn-sm btn-light edit-btn"><i class="far fa-pen"></i></a>
 
 
-    <p><a href="{% url 'home:offerta_pdf' offerta.pk %}" class="btn btn-sm btn-dark">PDF <i class="far fa-file-pdf"></i></a> Offerta n. <strong>[[offerta.numero_documento]]</strong> del <strong>[[offerta.data]]</strong></p>
+    <p><a href="{% url 'home:offerta_pdf' offerta.pk %}" class="btn btn-sm btn-dark me-3">PDF <i class="far fa-file-pdf"></i></a>
+        <a target="_blank" href="{% url 'home:installatore_start' offerta.pk offerta.token %}" class="btn btn-sm btn-primary me-3">Installatore <i class="far fa-wrench"></i></a>
+        
+        Offerta n. <strong>[[offerta.numero_documento]]</strong> del <strong>[[offerta.data]]</strong></p>
     <p>Validità: <strong>[[offerta.validita]] giorni</strong></p>
     <p v-if="offerta.pagamento">Pagamento: <strong>[[offerta.pagamento]]</strong></p>
     <p>Destinazione: <strong>[[offerta.indirizzo ? offerta.indirizzo : 'Indirizzo principale']]</strong></p>
